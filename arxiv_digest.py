@@ -566,9 +566,18 @@ def main():
         log("No announcement in the feed (weekend/holiday). Nothing to do.")
         return
     out_json = os.path.join(DIGEST_DIR, f"{date}.json")
-    if os.path.exists(out_json) and not args.force:
-        log(f"Digest for {date} already exists (arXiv has not announced anything new).")
-        return
+    prev_ai = {}
+    if os.path.exists(out_json):
+        if not args.force:
+            log(f"Digest for {date} already exists (arXiv has not announced anything new).")
+            return
+        try:
+            with open(out_json) as fh:
+                for old_p in json.load(fh).get("papers", []):
+                    if old_p.get("ai", {}).get("source") not in (None, "error"):
+                        prev_ai[old_p["id"]] = old_p["ai"]
+        except Exception:  # noqa: BLE001
+            pass
 
     if args.force:
         for f in glob.glob(os.path.join(CACHE_DIR, "*.json")):
@@ -591,7 +600,10 @@ def main():
             futs = {ex.submit(summarise_agy, p, agy_bin, args.agy_model, profile): p for p in todo}
             for i, fut in enumerate(cf.as_completed(futs), 1):
                 p = futs[fut]
-                p["ai"] = fut.result()
+                res = fut.result()
+                if res.get("source") == "error" and p["id"] in prev_ai:
+                    res = prev_ai[p["id"]]
+                p["ai"] = res
                 log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
     else:
         log(f"Announcement {date}: {len(todo)} papers to summarise with Gemini ({MODEL}) "
@@ -600,7 +612,10 @@ def main():
             futs = {ex.submit(summarise, p, api_key, profile): p for p in todo}
             for i, fut in enumerate(cf.as_completed(futs), 1):
                 p = futs[fut]
-                p["ai"] = fut.result()
+                res = fut.result()
+                if res.get("source") == "error" and p["id"] in prev_ai:
+                    res = prev_ai[p["id"]]
+                p["ai"] = res
                 log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
 
     write_outputs(date, papers)
