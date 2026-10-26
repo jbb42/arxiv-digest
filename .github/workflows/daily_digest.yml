@@ -1,6 +1,10 @@
 name: Daily arXiv Digest
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'digests/**'
   schedule:
     # Runs at 05:00 UTC every weekday (06:00 CET / 07:00 CEST)
     - cron: '0 5 * * 1-5'

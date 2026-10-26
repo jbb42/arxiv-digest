@@ -55,6 +55,18 @@ DIGEST_DIR = os.path.join(HERE, "digests")
 CACHE_DIR = os.path.join(HERE, "cache")
 USER_AGENT = "arxiv-digest/1.0 (personal daily reader; mailto:j.b.bendtsen@astro.uio.no)"
 
+SCHEMA_JSON = {
+    "type": "object",
+    "properties": {
+        "summary": {"type": "string"},
+        "conclusions": {"type": "array", "items": {"type": "string"}},
+        "relevance": {"type": "integer", "minimum": 0, "maximum": 3},
+        "relevance_reason": {"type": "string"},
+        "tags": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["summary", "conclusions", "relevance", "relevance_reason", "tags"],
+}
+
 SCHEMA = {
     "type": "OBJECT",
     "properties": {
@@ -232,6 +244,50 @@ def trim_text(t):
 
 
 # --------------------------------------------------------------- Gemini -------
+
+
+def summarise_agy(paper, agy_bin, agy_model, profile):
+    cache = os.path.join(CACHE_DIR, paper["id"] + ".json")
+    if os.path.exists(cache):
+        with open(cache) as f:
+            return json.load(f)
+
+    text = trim_text(full_text(paper["id"]))
+    source = "full text" if len(text) > 3000 else "abstract only"
+    full_prompt = (
+        SYSTEM_PROMPT + profile + "\n\n---\nPAPER TO SUMMARISE:\n"
+        f"Title: {paper['title']}\nAuthors: {paper['authors']}\n"
+        f"arXiv: {paper['id']}  Categories: {', '.join(paper['categories'])}\n\n"
+        f"Abstract: {paper['abstract']}\n\n"
+        + (f"FULL TEXT (may be truncated):\n{text}" if source == "full text" else "")
+    )
+    cmd = [
+        agy_bin, "--model", agy_model, "--output-format", "json",
+        "--json-schema", json.dumps(SCHEMA_JSON), "--disable-slash-commands",
+        f"-p={full_prompt}"
+    ]
+    last_err = ""
+    for attempt in range(3):
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        try:
+            out = json.loads(r.stdout)
+            res = out.get("structured_output")
+            if res is None:
+                res = json.loads(re.search(r"\{.*\}", out.get("response", ""), re.S).group(0))
+            res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
+            res["source"] = source
+            res["model"] = agy_model
+            res["cost_usd"] = 0.0
+            with open(cache, "w") as f:
+                json.dump(res, f)
+            return res
+        except Exception as e:  # noqa: BLE001
+            last_err = f"{e}; stderr: {r.stderr[-300:]} stdout: {r.stdout[-300:]}"
+            time.sleep(5 * (attempt + 1))
+    log(f"  FAILED {paper['id']}: {last_err}")
+    return {"summary": "(Antigravity summary failed - see abstract.)", "conclusions": [],
+            "relevance": 0, "relevance_reason": "", "tags": [], "source": "error",
+            "model": agy_model, "cost_usd": 0}
 
 
 def summarise(paper, api_key, profile):
@@ -475,6 +531,10 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--render-only", action="store_true")
+    ap.add_argument("--agy", action="store_true",
+                    help="Use local Antigravity CLI (agy) with Google AI Pro instead of API key")
+    ap.add_argument("--agy-model", default="gemini-4-argon-low",
+                    help="Antigravity model when --agy is set (default: gemini-4-argon-low)")
     args = ap.parse_args()
     for d in (DIGEST_DIR, CACHE_DIR):
         os.makedirs(d, exist_ok=True)
@@ -488,8 +548,8 @@ def main():
         return
 
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not api_key:
-        sys.exit("Error: GEMINI_API_KEY environment variable is not set.")
+    if not args.agy and not api_key:
+        sys.exit("Error: GEMINI_API_KEY environment variable is not set (or pass --agy).")
 
     date, papers = get_feed()
     if not date or not papers:
@@ -500,21 +560,38 @@ def main():
         log(f"Digest for {date} already exists (arXiv has not announced anything new).")
         return
 
+    if args.force:
+        for f in glob.glob(os.path.join(CACHE_DIR, "*.json")):
+            os.remove(f)
+
     with open(PROFILE_FILE) as f:
         profile = f.read()
     todo = [p for p in papers if p["type"] in SUMMARISE_TYPES]
     if args.limit:
         todo = todo[:args.limit]
         papers = todo + [p for p in papers if p["type"] not in SUMMARISE_TYPES]
-    log(f"Announcement {date}: {len(todo)} papers to summarise with Gemini ({MODEL}) "
-        f"({len(papers) - len(todo)} replacements listed).")
 
-    with cf.ThreadPoolExecutor(MAX_WORKERS) as ex:
-        futs = {ex.submit(summarise, p, api_key, profile): p for p in todo}
-        for i, fut in enumerate(cf.as_completed(futs), 1):
-            p = futs[fut]
-            p["ai"] = fut.result()
-            log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
+    if args.agy:
+        agy_bin = os.path.expanduser("~/.local/bin/agy")
+        if not os.access(agy_bin, os.X_OK):
+            agy_bin = "agy"
+        log(f"Announcement {date}: {len(todo)} papers to summarise with Antigravity "
+            f"({args.agy_model}) ({len(papers) - len(todo)} replacements listed).")
+        with cf.ThreadPoolExecutor(MAX_WORKERS) as ex:
+            futs = {ex.submit(summarise_agy, p, agy_bin, args.agy_model, profile): p for p in todo}
+            for i, fut in enumerate(cf.as_completed(futs), 1):
+                p = futs[fut]
+                p["ai"] = fut.result()
+                log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
+    else:
+        log(f"Announcement {date}: {len(todo)} papers to summarise with Gemini ({MODEL}) "
+            f"({len(papers) - len(todo)} replacements listed).")
+        with cf.ThreadPoolExecutor(MAX_WORKERS) as ex:
+            futs = {ex.submit(summarise, p, api_key, profile): p for p in todo}
+            for i, fut in enumerate(cf.as_completed(futs), 1):
+                p = futs[fut]
+                p["ai"] = fut.result()
+                log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
 
     write_outputs(date, papers)
     for f in glob.glob(os.path.join(CACHE_DIR, "*.json")):
