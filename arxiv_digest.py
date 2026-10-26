@@ -43,9 +43,13 @@ MODEL_PRIORITY = [
     "gemini-3.7-flash",
     "gemini-3.6-flash",
     "gemini-3.5-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-3-flash-preview",
 ]
 MODEL = os.environ.get("GEMINI_MODEL", MODEL_PRIORITY[0])
 _DISABLED_MODELS = set()
+
+BATCH_SCHEMA = None
 MAX_WORKERS = 3                       # parallel Gemini calls (respects free-tier RPM limits)
 SUMMARISE_TYPES = ("new", "cross")    # replacements are only listed
 HEAD_CHARS = 30000                    # text sent to Gemini: start of paper ...
@@ -314,39 +318,45 @@ def summarise(paper, api_key, profile):
     }
     body = json.dumps(payload).encode("utf-8")
     candidates = [MODEL] + [m for m in MODEL_PRIORITY if m != MODEL]
-    models_to_try = [m for m in candidates if m not in _DISABLED_MODELS] or candidates
     last_err = ""
-    for cur_model in models_to_try:
-        if cur_model in _DISABLED_MODELS:
-            continue
-        url = (f"https://generativelanguage.googleapis.com/v1beta/models/{cur_model}"
-               f":generateContent?key={api_key}")
-        req = urllib.request.Request(
-            url, data=body, headers={"Content-Type": "application/json"}, method="POST"
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=90) as resp:
-                out = json.loads(resp.read().decode("utf-8"))
-            parts = out["candidates"][0]["content"]["parts"]
-            raw_json = next(p["text"] for p in reversed(parts) if "text" in p)
-            res = json.loads(raw_json)
-            res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
-            res["source"] = source
-            res["model"] = cur_model
-            res["cost_usd"] = 0.0
-            with open(cache, "w") as f:
-                json.dump(res, f)
-            return res
-        except urllib.error.HTTPError as e:
-            err_body = e.read().decode("utf-8", "replace")[:400]
-            last_err = f"HTTP {e.code} ({cur_model}): {err_body}"
-            if e.code in (404, 400) or (e.code == 429 and "quota" in err_body.lower()):
-                _DISABLED_MODELS.add(cur_model)
-            else:
-                time.sleep(2)
-        except Exception as e:  # noqa: BLE001
-            last_err = f"{cur_model}: {e}"
-            time.sleep(2)
+    for pass_num in range(3):
+        models_to_try = [m for m in candidates if m not in _DISABLED_MODELS] or candidates
+        for cur_model in models_to_try:
+            if cur_model in _DISABLED_MODELS:
+                continue
+            url = (f"https://generativelanguage.googleapis.com/v1beta/models/{cur_model}"
+                   f":generateContent?key={api_key}")
+            req = urllib.request.Request(
+                url, data=body, headers={"Content-Type": "application/json"}, method="POST"
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=90) as resp:
+                    out = json.loads(resp.read().decode("utf-8"))
+                parts = out["candidates"][0]["content"]["parts"]
+                raw_json = next(p["text"] for p in reversed(parts) if "text" in p)
+                res = json.loads(raw_json)
+                res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
+                res["source"] = source
+                res["model"] = cur_model
+                res["cost_usd"] = 0.0
+                with open(cache, "w") as f:
+                    json.dump(res, f)
+                return res
+            except urllib.error.HTTPError as e:
+                err_body = e.read().decode("utf-8", "replace")[:400]
+                last_err = f"HTTP {e.code} ({cur_model}): {err_body}"
+                if e.code in (404, 400):
+                    _DISABLED_MODELS.add(cur_model)
+                elif e.code == 429:
+                    if "limit: 0" in err_body:
+                        _DISABLED_MODELS.add(cur_model)
+                    else:
+                        time.sleep(8 * (pass_num + 1))
+                else:
+                    time.sleep(4 * (pass_num + 1))
+            except Exception as e:  # noqa: BLE001
+                last_err = f"{cur_model}: {e}"
+                time.sleep(4 * (pass_num + 1))
     log(f"  FAILED {paper['id']}: {last_err}")
     return {"summary": "(Gemini summary failed - see abstract.)", "conclusions": [],
             "relevance": 0, "relevance_reason": "", "tags": [], "source": "error",
