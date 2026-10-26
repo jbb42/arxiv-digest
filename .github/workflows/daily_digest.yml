@@ -56,6 +56,7 @@ jobs:
           git add digests/
           if ! git diff --cached --quiet; then
             git commit -m "Update arXiv digest ($(date -u +'%Y-%m-%d'))"
+            git pull --rebase
             git push
           fi
 
