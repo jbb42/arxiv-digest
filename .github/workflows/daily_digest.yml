@@ -5,6 +5,12 @@ on:
     # Runs at 05:00 UTC every weekday (06:00 CET / 07:00 CEST)
     - cron: '0 5 * * 1-5'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force rebuild even if today digest already exists'
+        required: false
+        default: 'false'
+        type: boolean
 
 permissions:
   contents: write
@@ -37,7 +43,11 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          python3 arxiv_digest.py
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            python3 arxiv_digest.py --force
+          else
+            python3 arxiv_digest.py
+          fi
 
       - name: Commit and push updated digests
         run: |

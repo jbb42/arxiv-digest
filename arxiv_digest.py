@@ -422,7 +422,8 @@ def render(date, papers, cost):
                  f'{esc(p["title"])}</a> <span class="meta">({esc(p["id"])})</span></li>'
                  for p in repl]
         body.append("</ul>")
-    body.append(f"<footer>Summaries written by Gemini ({MODEL}) from the full text "
+    models_used = sorted({p.get("ai", {}).get("model", MODEL) for p in summ if p.get("ai", {}).get("model")}) or [MODEL]
+    body.append(f"<footer>Summaries written by Gemini ({', '.join(models_used)}) from the full text "
                 f"where available; check the paper before citing anything. "
                 f"Generated {dt.datetime.now():%Y-%m-%d %H:%M}.</footer>")
     return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
