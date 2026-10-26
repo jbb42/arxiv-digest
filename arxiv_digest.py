@@ -34,7 +34,8 @@ from html.parser import HTMLParser
 # ------------------------------------------------------------------ config ---
 HERE = os.path.dirname(os.path.abspath(__file__))
 CATEGORIES = ["astro-ph.CO"]          # add e.g. "gr-qc" if you like
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
+FALLBACK_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.1-flash-lite"]
 MAX_WORKERS = 3                       # parallel Gemini calls (respects free-tier RPM limits)
 SUMMARISE_TYPES = ("new", "cross")    # replacements are only listed
 HEAD_CHARS = 30000                    # text sent to Gemini: start of paper ...
@@ -56,19 +57,14 @@ SCHEMA = {
     "required": ["summary", "conclusions", "relevance", "relevance_reason", "tags"],
 }
 
-SYSTEM_PROMPT = """You are an expert cosmologist writing a daily arXiv digest for a PhD student.
+SYSTEM_PROMPT = """You are a friendly, clear-spoken cosmology mentor writing a daily arXiv digest for a first-year PhD student in cosmology.
+The student has a solid physics/cosmology foundation (ΛCDM, expansion history, perturbation theory, N-body simulations) and works on beyond-ΛCDM simulations/emulators and inhomogeneous cosmology, but is NOT an expert in every specialized subfield of cosmology or astrophysics.
+
 For the paper you are given, return:
-- summary: 3-5 sentences in plain, precise language. Say what question the paper
-  addresses, what they actually did (method, data, simulations, model) and why it
-  matters. Do NOT paraphrase the abstract sentence by sentence; use the full text.
-- conclusions: 2-5 short bullet points with the main quantitative/qualitative
-  results (include key numbers, constraints and significances where given).
-- relevance: integer 0-3 for how relevant the paper is to the student's research
-  profile below. 3 = directly on their topic/methods (they should read it today),
-  2 = closely related / useful method or result, 1 = loosely related background,
-  0 = unrelated. Be strict: most papers should be 0 or 1.
-- relevance_reason: one sentence explaining the score with reference to the profile
-  (empty string if relevance is 0).
+- summary: 3-5 sentences written so a first-year cosmology PhD student can immediately grasp the big picture, even if the paper is outside their specialty. Start by briefly explaining the physical context or problem in accessible terms (defining any niche jargon, acronyms, or specialized phenomena in plain language), then explain what the authors actually did (method, data, simulations, or theoretical model) and why it matters. Do NOT paraphrase the abstract sentence by sentence; synthesize from the full text.
+- conclusions: 2-5 short, clear bullet points stating the main takeaways and quantitative/qualitative results (include key numbers, constraints, or significances where given, and briefly state what those numbers mean physically).
+- relevance: integer 0-3 for how relevant the paper is to the student's research profile below. 3 = directly on their topic/methods (they should read it today), 2 = closely related / useful method or result, 1 = loosely related background, 0 = unrelated. Be strict: most papers should be 0 or 1.
+- relevance_reason: one clear sentence explaining the score with reference to the profile (empty string if relevance is 0).
 - tags: 2-5 short topic tags (e.g. "weak lensing", "f(R)", "emulator", "BAO").
 Use LaTeX in $...$ for maths if needed.
 
@@ -241,8 +237,6 @@ def summarise(paper, api_key, profile):
               f"Abstract: {paper['abstract']}\n\n"
               + (f"FULL TEXT (may be truncated):\n{text}" if source == "full text" else ""))
 
-    url = (f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}"
-           f":generateContent?key={api_key}")
     payload = {
         "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT + profile}]},
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
@@ -253,15 +247,20 @@ def summarise(paper, api_key, profile):
         },
     }
     body = json.dumps(payload).encode("utf-8")
+    models_to_try = [MODEL] + [m for m in FALLBACK_MODELS if m != MODEL]
     last_err = ""
     for attempt in range(4):
+        cur_model = models_to_try[min(attempt, len(models_to_try) - 1)]
+        url = (f"https://generativelanguage.googleapis.com/v1beta/models/{cur_model}"
+               f":generateContent?key={api_key}")
         req = urllib.request.Request(
             url, data=body, headers={"Content-Type": "application/json"}, method="POST"
         )
         try:
-            with urllib.request.urlopen(req, timeout=180) as resp:
+            with urllib.request.urlopen(req, timeout=120) as resp:
                 out = json.loads(resp.read().decode("utf-8"))
-            raw_json = out["candidates"][0]["content"]["parts"][0]["text"]
+            parts = out["candidates"][0]["content"]["parts"]
+            raw_json = next(p["text"] for p in reversed(parts) if "text" in p)
             res = json.loads(raw_json)
             res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
             res["source"] = source
@@ -271,14 +270,14 @@ def summarise(paper, api_key, profile):
             return res
         except urllib.error.HTTPError as e:
             err_body = e.read().decode("utf-8", "replace")[:400]
-            last_err = f"HTTP {e.code}: {err_body}"
+            last_err = f"HTTP {e.code} ({cur_model}): {err_body}"
             if e.code == 429:
-                time.sleep(20 * (attempt + 1))
+                time.sleep(15 * (attempt + 1))
             else:
-                time.sleep(8 * (attempt + 1))
+                time.sleep(4 * (attempt + 1))
         except Exception as e:  # noqa: BLE001
-            last_err = str(e)
-            time.sleep(8 * (attempt + 1))
+            last_err = f"{cur_model}: {e}"
+            time.sleep(4 * (attempt + 1))
     log(f"  FAILED {paper['id']}: {last_err}")
     return {"summary": "(Gemini summary failed - see abstract.)", "conclusions": [],
             "relevance": 0, "relevance_reason": "", "tags": [], "source": "error",
