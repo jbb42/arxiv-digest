@@ -250,11 +250,22 @@ def trim_text(t):
 # --------------------------------------------------------------- Gemini -------
 
 
+AGY_MODEL_PRIORITY = [
+    "gemini-4-argon-low",
+    "gemini-4-argon-medium",
+    "gemini-3.8-flash-medium",
+    "gemini-3.8-flash-low",
+    "claude-sonnet-5-5-low",
+]
+
+
 def summarise_agy(paper, agy_bin, agy_model, profile):
     cache = os.path.join(CACHE_DIR, paper["id"] + ".json")
     if os.path.exists(cache):
         with open(cache) as f:
-            return json.load(f)
+            cached = json.load(f)
+        if cached.get("source") not in (None, "error") and "failed" not in cached.get("summary", "").lower():
+            return cached
 
     text = trim_text(full_text(paper["id"]))
     source = "full text" if len(text) > 3000 else "abstract only"
@@ -265,40 +276,46 @@ def summarise_agy(paper, agy_bin, agy_model, profile):
         f"Abstract: {paper['abstract']}\n\n"
         + (f"FULL TEXT (may be truncated):\n{text}" if source == "full text" else "")
     )
-    cmd = [
-        agy_bin, "--model", agy_model, "--output-format", "json",
-        "--json-schema", json.dumps(SCHEMA_JSON), "--disable-slash-commands",
-        f"-p={full_prompt}"
-    ]
+    models_to_try = [agy_model] + [m for m in AGY_MODEL_PRIORITY if m != agy_model]
     last_err = ""
-    for attempt in range(3):
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
-        try:
-            out = json.loads(r.stdout)
-            res = out.get("structured_output")
-            if res is None:
-                res = json.loads(re.search(r"\{.*\}", out.get("response", ""), re.S).group(0))
-            res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
-            res["source"] = source
-            res["model"] = agy_model
-            res["cost_usd"] = 0.0
-            with open(cache, "w") as f:
-                json.dump(res, f)
-            return res
-        except Exception as e:  # noqa: BLE001
-            last_err = f"{e}; stderr: {r.stderr[-300:]} stdout: {r.stdout[-300:]}"
-            time.sleep(5 * (attempt + 1))
+    for cur_model in models_to_try:
+        cmd = [
+            agy_bin, "--model", cur_model, "--output-format", "json",
+            "--json-schema", json.dumps(SCHEMA_JSON), "--disable-slash-commands",
+            f"-p={full_prompt}"
+        ]
+        for attempt in range(2):
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            try:
+                out = json.loads(r.stdout)
+                res = out.get("structured_output")
+                if res is None:
+                    res = json.loads(re.search(r"\{.*\}", out.get("response", ""), re.S).group(0))
+                if not res.get("summary") or "failed" in res.get("summary", "").lower():
+                    raise ValueError(f"Empty or failed summary string: {res.get('summary')}")
+                res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
+                res["source"] = source
+                res["model"] = cur_model
+                res["cost_usd"] = 0.0
+                with open(cache, "w") as f:
+                    json.dump(res, f)
+                return res
+            except Exception as e:  # noqa: BLE001
+                last_err = f"{cur_model}: {e}; stderr: {r.stderr[-300:]} stdout: {r.stdout[-300:]}"
+                time.sleep(4 * (attempt + 1))
     log(f"  FAILED {paper['id']}: {last_err}")
     return {"summary": "(Antigravity summary failed - see abstract.)", "conclusions": [],
             "relevance": 0, "relevance_reason": "", "tags": [], "source": "error",
             "model": agy_model, "cost_usd": 0}
 
 
-def summarise(paper, api_key, profile):
+def summarise(paper, api_key, profile, preferred_model=None):
     cache = os.path.join(CACHE_DIR, paper["id"] + ".json")
     if os.path.exists(cache):
         with open(cache) as f:
-            return json.load(f)
+            cached = json.load(f)
+        if not is_failed_ai(cached):
+            return cached
 
     text = trim_text(full_text(paper["id"]))
     source = "full text" if len(text) > 3000 else "abstract only"
@@ -317,7 +334,8 @@ def summarise(paper, api_key, profile):
         },
     }
     body = json.dumps(payload).encode("utf-8")
-    candidates = [MODEL] + [m for m in MODEL_PRIORITY if m != MODEL]
+    start_model = preferred_model or MODEL
+    candidates = [start_model] + [m for m in MODEL_PRIORITY if m != start_model]
     last_err = ""
     for pass_num in range(3):
         models_to_try = [m for m in candidates if m not in _DISABLED_MODELS] or candidates
@@ -539,6 +557,13 @@ def write_outputs(date, papers):
 # ----------------------------------------------------------------- main -------
 
 
+def is_failed_ai(ai):
+    if not ai or ai.get("source") in (None, "error"):
+        return True
+    s = ai.get("summary", "").strip().lower()
+    return not s or "summary failed" in s
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -572,16 +597,17 @@ def main():
     out_json = os.path.join(DIGEST_DIR, f"{date}.json")
     prev_ai = {}
     if os.path.exists(out_json):
-        if not args.force:
-            log(f"Digest for {date} already exists (arXiv has not announced anything new).")
-            return
         try:
             with open(out_json) as fh:
                 for old_p in json.load(fh).get("papers", []):
-                    if old_p.get("ai", {}).get("source") not in (None, "error"):
+                    if not is_failed_ai(old_p.get("ai")):
                         prev_ai[old_p["id"]] = old_p["ai"]
         except Exception:  # noqa: BLE001
             pass
+        # Only skip if not --force AND all existing summaries in out_json succeeded
+        if not args.force and len(prev_ai) >= sum(p["type"] in SUMMARISE_TYPES for p in papers):
+            log(f"Digest for {date} already exists with 0 errors. Nothing to do.")
+            return
 
     if args.force:
         for f in glob.glob(os.path.join(CACHE_DIR, "*.json")):
@@ -594,20 +620,18 @@ def main():
         todo = todo[:args.limit]
         papers = todo + [p for p in papers if p["type"] not in SUMMARISE_TYPES]
 
+    agy_bin = os.path.expanduser("~/.local/bin/agy")
+    if not os.access(agy_bin, os.X_OK):
+        agy_bin = "agy"
+
     if args.agy:
-        agy_bin = os.path.expanduser("~/.local/bin/agy")
-        if not os.access(agy_bin, os.X_OK):
-            agy_bin = "agy"
         log(f"Announcement {date}: {len(todo)} papers to summarise with Antigravity "
             f"({args.agy_model}) ({len(papers) - len(todo)} replacements listed).")
         with cf.ThreadPoolExecutor(MAX_WORKERS) as ex:
             futs = {ex.submit(summarise_agy, p, agy_bin, args.agy_model, profile): p for p in todo}
             for i, fut in enumerate(cf.as_completed(futs), 1):
                 p = futs[fut]
-                res = fut.result()
-                if res.get("source") == "error" and p["id"] in prev_ai:
-                    res = prev_ai[p["id"]]
-                p["ai"] = res
+                p["ai"] = fut.result()
                 log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
     else:
         log(f"Announcement {date}: {len(todo)} papers to summarise with Gemini ({MODEL}) "
@@ -616,25 +640,42 @@ def main():
             futs = {ex.submit(summarise, p, api_key, profile): p for p in todo}
             for i, fut in enumerate(cf.as_completed(futs), 1):
                 p = futs[fut]
-                res = fut.result()
-                if res.get("source") == "error" and p["id"] in prev_ai:
-                    res = prev_ai[p["id"]]
-                p["ai"] = res
+                p["ai"] = fut.result()
                 log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
 
-    # Second-chance sequential retry pass for any papers that still failed
-    failed_papers = [p for p in todo if p.get("ai", {}).get("source") == "error"]
-    if failed_papers:
-        log(f"Retrying {len(failed_papers)} failed paper(s) sequentially after cooldown...")
-        time.sleep(15)
+    # Pre-publish verification: check for any failed summaries, rerun and cycle models
+    fallback_chains = AGY_MODEL_PRIORITY if args.agy else MODEL_PRIORITY
+    for round_idx, alt_model in enumerate(fallback_chains, 1):
+        failed_papers = [p for p in todo if is_failed_ai(p.get("ai"))]
+        if not failed_papers:
+            break
+        log(f"Verification found {len(failed_papers)} failed summary(ies); "
+            f"rerunning sequentially with model '{alt_model}' (round {round_idx})...")
+        time.sleep(10)
         _DISABLED_MODELS.clear()
         for p in failed_papers:
-            res = (summarise_agy(p, agy_bin, args.agy_model, profile)
-                   if args.agy else summarise(p, api_key, profile))
-            if res.get("source") == "error" and p["id"] in prev_ai:
-                res = prev_ai[p["id"]]
+            cache_file = os.path.join(CACHE_DIR, p["id"] + ".json")
+            if os.path.exists(cache_file):
+                os.remove(cache_file)
+            if args.agy:
+                res = summarise_agy(p, agy_bin, alt_model, profile)
+            else:
+                res = summarise(p, api_key, profile, preferred_model=alt_model)
             p["ai"] = res
-            log(f"  [retry] r={p['ai']['relevance']} ({p['ai']['source']}) {p['id']}")
+            log(f"  [rerun {alt_model}] r={p['ai']['relevance']} ({p['ai']['source']}) {p['id']}")
+
+    # Final fallback: if any paper still failed, restore previous valid summary or raise error
+    still_failed = []
+    for p in todo:
+        if is_failed_ai(p.get("ai")):
+            if p["id"] in prev_ai:
+                log(f"  Restoring previous valid summary for {p['id']}")
+                p["ai"] = prev_ai[p["id"]]
+            else:
+                still_failed.append(p["id"])
+
+    if still_failed:
+        sys.exit(f"Aborting publish: {len(still_failed)} paper(s) still failed after all model retries: {still_failed}")
 
     write_outputs(date, papers)
     for f in glob.glob(os.path.join(CACHE_DIR, "*.json")):
