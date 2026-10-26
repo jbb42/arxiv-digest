@@ -343,17 +343,21 @@ def summarise(paper, api_key, profile):
                     json.dump(res, f)
                 return res
             except urllib.error.HTTPError as e:
-                err_body = e.read().decode("utf-8", "replace")[:400]
+                err_body = e.read().decode("utf-8", "replace")[:600]
                 last_err = f"HTTP {e.code} ({cur_model}): {err_body}"
                 if e.code in (404, 400):
                     _DISABLED_MODELS.add(cur_model)
                 elif e.code == 429:
-                    if "limit: 0" in err_body:
+                    # Permanent daily quota exhaustion (FreeTierRequestsPerDay / limit: 0 or limit: 20)
+                    if "limit: 0" in err_body or "GenerateRequestsPerDay" in err_body or "free_tier_requests" in err_body:
                         _DISABLED_MODELS.add(cur_model)
                     else:
-                        time.sleep(8 * (pass_num + 1))
+                        # Per-minute rate limit (RPM/TPM): parse retryDelay or sleep 25s
+                        m_wait = re.search(r"retry in ([\d.]+)s", err_body)
+                        wait_s = float(m_wait.group(1)) + 2.0 if m_wait else 25.0 * (pass_num + 1)
+                        time.sleep(min(wait_s, 65.0))
                 else:
-                    time.sleep(4 * (pass_num + 1))
+                    time.sleep(5 * (pass_num + 1))
             except Exception as e:  # noqa: BLE001
                 last_err = f"{cur_model}: {e}"
                 time.sleep(4 * (pass_num + 1))
@@ -617,6 +621,20 @@ def main():
                     res = prev_ai[p["id"]]
                 p["ai"] = res
                 log(f"  [{i}/{len(todo)}] r={p['ai']['relevance']} {p['id']} {p['title'][:70]}")
+
+    # Second-chance sequential retry pass for any papers that still failed
+    failed_papers = [p for p in todo if p.get("ai", {}).get("source") == "error"]
+    if failed_papers:
+        log(f"Retrying {len(failed_papers)} failed paper(s) sequentially after cooldown...")
+        time.sleep(15)
+        _DISABLED_MODELS.clear()
+        for p in failed_papers:
+            res = (summarise_agy(p, agy_bin, args.agy_model, profile)
+                   if args.agy else summarise(p, api_key, profile))
+            if res.get("source") == "error" and p["id"] in prev_ai:
+                res = prev_ai[p["id"]]
+            p["ai"] = res
+            log(f"  [retry] r={p['ai']['relevance']} ({p['ai']['source']}) {p['id']}")
 
     write_outputs(date, papers)
     for f in glob.glob(os.path.join(CACHE_DIR, "*.json")):
