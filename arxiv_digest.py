@@ -426,6 +426,7 @@ border-radius:999px;margin-right:6px;vertical-align:middle}
 .r2 .why{color:var(--hi2)}
 .card ul{margin:6px 0 4px;padding-left:20px}
 .card li{margin:2px 0}
+.card code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:.9em}
 .tags span{display:inline-block;background:var(--chip);color:var(--muted);font-size:.75rem;
 padding:2px 8px;border-radius:999px;margin:6px 4px 0 0}
 details{margin-top:8px;font-size:.9rem;color:var(--muted)}
@@ -452,8 +453,39 @@ MATHJAX = ('<script>window.MathJax={tex:{inlineMath:[["$","$"],["\\\\(","\\\\)"]
            '</script>')
 
 
+_MD_TOKEN_RE = re.compile(
+    r"(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]|(?<!`)`(?!`)[^`\n]+?(?<!`)`(?!`))"
+)
+
+
 def esc(s):
     return html.escape(s or "", quote=True)
+
+
+def md(s):
+    """HTML-escape text and render inline markdown/LaTeX (**bold**, *italic*, `code`, quotes, dashes), preserving $math$."""
+    s = esc(s)
+    out = []
+    for i, part in enumerate(_MD_TOKEN_RE.split(s)):
+        if i % 2 == 1:
+            if part.startswith("`") and part.endswith("`"):
+                out.append(f"<code>{part[1:-1]}</code>")
+            else:
+                out.append(part.replace("---", "—").replace("--", "–"))
+        else:
+            part = part.replace("``", "“").replace("&#x27;&#x27;", "”")
+            part = re.sub(r"(?<!`)`([^`\n]+?)&#x27;(?!&#x27;)", r"‘\1’", part)
+            part = part.replace("---", "—").replace("--", "–")
+            part = part.replace(r"\%", "%").replace(r"\,", "\u2009")
+            part = re.sub(r"(?<=[A-Za-z.])~(?=\S)", "\u00a0", part)
+            part = re.sub(r"\\(?:textbf|bf)\{([^{}]*)\}", r"<strong>\1</strong>", part)
+            part = re.sub(r"\\(?:textit|emph|it)\{([^{}]*)\}", r"<em>\1</em>", part)
+            part = re.sub(r"\\texttt\{([^{}]*)\}", r"<code>\1</code>", part)
+            part = re.sub(r"\*\*\*(?!\s)(.+?)(?<!\s)\*\*\*", r"<strong><em>\1</em></strong>", part)
+            part = re.sub(r"\*\*(?!\s)(.+?)(?<!\s)\*\*", r"<strong>\1</strong>", part)
+            part = re.sub(r"(?<!\*)\*(?!\s)([^*\n]+?)(?<!\s)\*(?!\*)", r"<em>\1</em>", part)
+            out.append(part)
+    return "".join(out)
 
 
 def card(p):
@@ -465,22 +497,22 @@ def card(p):
         badges += '<span class="badge b1">cross-list</span>'
     if s.get("source") == "abstract only":
         badges += '<span class="badge b1">from abstract</span>'
-    why = (f'<div class="why">Why: {esc(s.get("relevance_reason"))}</div>'
+    why = (f'<div class="why">Why: {md(s.get("relevance_reason"))}</div>'
            if r >= 2 and s.get("relevance_reason") else "")
-    concl = "".join(f"<li>{esc(c)}</li>" for c in s.get("conclusions", []))
+    concl = "".join(f"<li>{md(c)}</li>" for c in s.get("conclusions", []))
     tags = "".join(f"<span>{esc(t)}</span>" for t in s.get("tags", []))
     aid = esc(p["id"])
     return f"""<article class="card r{r}" data-r="{r}" data-t="{esc(p['type'])}">
-<h3><a href="{esc(p['link'])}" target="_blank" rel="noopener">{esc(p['title'])}</a></h3>
+<h3><a href="{esc(p['link'])}" target="_blank" rel="noopener">{md(p['title'])}</a></h3>
 <div class="meta">{badges}{esc(p['authors'])}<br>
 <a href="https://arxiv.org/abs/{aid}" target="_blank" rel="noopener">arXiv:{aid}</a> ·
 <a href="https://arxiv.org/pdf/{aid}" target="_blank" rel="noopener">PDF</a> ·
 <a href="https://arxiv.org/html/{aid}" target="_blank" rel="noopener">HTML</a> ·
 {esc(', '.join(p['categories']))}</div>
-{why}<p>{esc(s.get('summary'))}</p>
+{why}<p>{md(s.get('summary'))}</p>
 {'<b>Main conclusions</b><ul>' + concl + '</ul>' if concl else ''}
 <div class="tags">{tags}</div>
-<details><summary>Abstract</summary><p>{esc(p['abstract'])}</p></details>
+<details><summary>Abstract</summary><p>{md(p['abstract'])}</p></details>
 </article>"""
 
 
@@ -507,7 +539,7 @@ def render(date, papers, cost):
     if repl:
         body.append(f"<h2>Replaced / updated ({len(repl)})</h2><ul class='repl'>")
         body += [f'<li><a href="{esc(p["link"])}" target="_blank" rel="noopener">'
-                 f'{esc(p["title"])}</a> <span class="meta">({esc(p["id"])})</span></li>'
+                 f'{md(p["title"])}</a> <span class="meta">({esc(p["id"])})</span></li>'
                  for p in repl]
         body.append("</ul>")
     models_used = sorted({p.get("ai", {}).get("model", MODEL) for p in summ if p.get("ai", {}).get("model")}) or [MODEL]
@@ -594,20 +626,32 @@ def main():
     if not date or not papers:
         log("No announcement in the feed (weekend/holiday). Nothing to do.")
         return
+
+    todo_ids = {p["id"] for p in papers if p["type"] in SUMMARISE_TYPES}
     out_json = os.path.join(DIGEST_DIR, f"{date}.json")
     prev_ai = {}
-    if os.path.exists(out_json):
+    for existing_f in sorted(glob.glob(os.path.join(DIGEST_DIR, "20??-??-??.json"))):
         try:
-            with open(out_json) as fh:
-                for old_p in json.load(fh).get("papers", []):
+            with open(existing_f) as fh:
+                existing_data = json.load(fh)
+            existing_ids = {
+                old_p["id"] for old_p in existing_data.get("papers", [])
+                if old_p.get("type") in SUMMARISE_TYPES and not is_failed_ai(old_p.get("ai"))
+            }
+            if existing_f == out_json:
+                for old_p in existing_data.get("papers", []):
                     if not is_failed_ai(old_p.get("ai")):
                         prev_ai[old_p["id"]] = old_p["ai"]
+            if not args.force and todo_ids and todo_ids.issubset(existing_ids):
+                log(f"No new batch of papers (announcement {date} already summarised in "
+                    f"{os.path.basename(existing_f)}). Nothing to do.")
+                return
         except Exception:  # noqa: BLE001
             pass
-        # Only skip if not --force AND all existing summaries in out_json succeeded
-        if not args.force and len(prev_ai) >= sum(p["type"] in SUMMARISE_TYPES for p in papers):
-            log(f"Digest for {date} already exists with 0 errors. Nothing to do.")
-            return
+
+    if os.path.exists(out_json) and not args.force and len(prev_ai) >= len(todo_ids):
+        log(f"Digest for {date} already exists with 0 errors. Nothing to do.")
+        return
 
     if args.force:
         for f in glob.glob(os.path.join(CACHE_DIR, "*.json")):

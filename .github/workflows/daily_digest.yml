@@ -6,8 +6,11 @@ on:
     paths:
       - 'digests/**'
   schedule:
-    # Runs at 05:00 UTC every weekday (06:00 CET / 07:00 CEST)
-    - cron: '0 5 * * 1-5'
+    # arXiv announces new listings at 20:00 US Eastern (00:00 UTC in EDT / 01:00 UTC in EST,
+    # i.e. 01:00-02:00 CET). GitHub Actions often delays scheduled crons by 4-6 hours,
+    # so we queue off-minute triggers starting at 00:17 UTC every day. Once a new batch is
+    # built, subsequent runs see no new papers and exit in <5s without redeploying.
+    - cron: '17 0,1,2,3,4,5,6 * * *'
   workflow_dispatch:
     inputs:
       force:
