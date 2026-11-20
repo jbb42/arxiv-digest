@@ -254,8 +254,11 @@ def trim_text(t):
 
 
 AGY_MODEL_PRIORITY = [
+    "gemini-4-neon-low",
+    "gemini-4-neon-medium",
     "gemini-4-argon-low",
     "gemini-4-argon-medium",
+    "gemini-4-hydrogen-medium",
     "gemini-3.8-flash-medium",
     "gemini-3.8-flash-low",
     "claude-sonnet-5-5-low",
@@ -650,8 +653,8 @@ def main():
     ap.add_argument("--render-only", action="store_true")
     ap.add_argument("--agy", action="store_true",
                     help="Use local Antigravity CLI (agy) with Google AI Pro instead of API key")
-    ap.add_argument("--agy-model", default="gemini-4-argon-low",
-                    help="Antigravity model when --agy is set (default: gemini-4-argon-low)")
+    ap.add_argument("--agy-model", default="gemini-4-neon-low",
+                    help="Antigravity model when --agy is set (default: gemini-4-neon-low)")
     args = ap.parse_args()
     for d in (DIGEST_DIR, CACHE_DIR):
         os.makedirs(d, exist_ok=True)
