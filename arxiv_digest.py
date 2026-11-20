@@ -26,6 +26,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -34,11 +35,12 @@ from html.parser import HTMLParser
 # ------------------------------------------------------------------ config ---
 HERE = os.path.dirname(os.path.abspath(__file__))
 CATEGORIES = ["astro-ph.CO"]          # add e.g. "gr-qc" if you like
-# Ranked from most capable to fastest fallback.
-# Note: Free-tier AI Studio keys have 0 RPM quota for gemini-4-argon/pro unless billing is linked;
-# if a model returns 429 (quota=0), it is automatically skipped for the rest of the run.
+# Ranked from most capable to fastest fallback on the Gemini API free tier.
+# Paid-only models (e.g. gemini-4-neon, gemini-4-argon) have 0 RPM quota without billing,
+# though they can still be requested explicitly via the GEMINI_MODEL environment variable.
+# If any model returns 404/400 or a 429 daily/zero-quota error, it is skipped for the run.
 MODEL_PRIORITY = [
-    "gemini-4-argon",
+    "gemini-4-hydrogen",
     "gemini-3.8-flash",
     "gemini-3.7-flash",
     "gemini-3.6-flash",
@@ -48,9 +50,10 @@ MODEL_PRIORITY = [
 ]
 MODEL = os.environ.get("GEMINI_MODEL", MODEL_PRIORITY[0])
 _DISABLED_MODELS = set()
+_DISABLED_LOCK = threading.Lock()
 
 BATCH_SCHEMA = None
-MAX_WORKERS = 3                       # parallel Gemini calls (respects free-tier RPM limits)
+MAX_WORKERS = 2                       # parallel Gemini calls (respects free-tier RPM/TPM limits)
 SUMMARISE_TYPES = ("new", "cross")    # replacements are only listed
 HEAD_CHARS = 30000                    # text sent to Gemini: start of paper ...
 CONCL_CHARS = 15000                   # ... plus the conclusions section
@@ -309,6 +312,50 @@ def summarise_agy(paper, agy_bin, agy_model, profile):
             "model": agy_model, "cost_usd": 0}
 
 
+def _disable_model(model_name, reason):
+    with _DISABLED_LOCK:
+        if model_name not in _DISABLED_MODELS:
+            _DISABLED_MODELS.add(model_name)
+            log(f"  Disabling model '{model_name}' for remainder of run ({reason})")
+
+
+def _is_permanent_quota_error(err_body):
+    """Return True if a 429 error means 0 quota or daily quota exhausted (not per-minute RPM/TPM)."""
+    # Note: Both per-minute and per-day free-tier 429s share the quotaMetric name
+    # 'generate_content_free_tier_requests', so only match explicit 0-limit or PerDay quotaIds.
+    return (
+        "limit: 0" in err_body
+        or "PerDay" in err_body
+        or "GenerateRequestsPerDay" in err_body
+    )
+
+
+def _parse_retry_delay(err_body, default_s):
+    m = re.search(r"retry in ([\d.]+)s", err_body) or re.search(
+        r'"retryDelay"\s*:\s*"([\d.]+)s"', err_body
+    )
+    wait_s = float(m.group(1)) + 2.0 if m else default_s
+    return min(wait_s, 65.0)
+
+
+def _build_payload(cur_model, profile, prompt):
+    gen_cfg = {
+        "responseMimeType": "application/json",
+        "responseSchema": SCHEMA,
+    }
+    if cur_model.startswith("gemini-4"):
+        # Gemini 4 models omit temperature and use discrete thinkingLevel presets.
+        gen_cfg["thinkingConfig"] = {"thinkingLevel": "MEDIUM"}
+    else:
+        gen_cfg["temperature"] = 0.2
+    payload = {
+        "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT + profile}]},
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": gen_cfg,
+    }
+    return json.dumps(payload).encode("utf-8")
+
+
 def summarise(paper, api_key, profile, preferred_model=None):
     cache = os.path.join(CACHE_DIR, paper["id"] + ".json")
     if os.path.exists(cache):
@@ -324,16 +371,6 @@ def summarise(paper, api_key, profile, preferred_model=None):
               f"Abstract: {paper['abstract']}\n\n"
               + (f"FULL TEXT (may be truncated):\n{text}" if source == "full text" else ""))
 
-    payload = {
-        "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT + profile}]},
-        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "responseMimeType": "application/json",
-            "responseSchema": SCHEMA,
-            "temperature": 0.2,
-        },
-    }
-    body = json.dumps(payload).encode("utf-8")
     start_model = preferred_model or MODEL
     candidates = [start_model] + [m for m in MODEL_PRIORITY if m != start_model]
     last_err = ""
@@ -344,41 +381,50 @@ def summarise(paper, api_key, profile, preferred_model=None):
                 continue
             url = (f"https://generativelanguage.googleapis.com/v1beta/models/{cur_model}"
                    f":generateContent?key={api_key}")
-            req = urllib.request.Request(
-                url, data=body, headers={"Content-Type": "application/json"}, method="POST"
-            )
-            try:
-                with urllib.request.urlopen(req, timeout=90) as resp:
-                    out = json.loads(resp.read().decode("utf-8"))
-                parts = out["candidates"][0]["content"]["parts"]
-                raw_json = next(p["text"] for p in reversed(parts) if "text" in p)
-                res = json.loads(raw_json)
-                res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
-                res["source"] = source
-                res["model"] = cur_model
-                res["cost_usd"] = 0.0
-                with open(cache, "w") as f:
-                    json.dump(res, f)
-                return res
-            except urllib.error.HTTPError as e:
-                err_body = e.read().decode("utf-8", "replace")[:600]
-                last_err = f"HTTP {e.code} ({cur_model}): {err_body}"
-                if e.code in (404, 400):
-                    _DISABLED_MODELS.add(cur_model)
-                elif e.code == 429:
-                    # Permanent daily quota exhaustion (FreeTierRequestsPerDay / limit: 0 or limit: 20)
-                    if "limit: 0" in err_body or "GenerateRequestsPerDay" in err_body or "free_tier_requests" in err_body:
-                        _DISABLED_MODELS.add(cur_model)
+            body = _build_payload(cur_model, profile, prompt)
+            # Retry the same top model on transient per-minute (RPM/TPM) 429s instead of
+            # immediately downgrading to a weaker fallback model.
+            for rpm_attempt in range(3):
+                if cur_model in _DISABLED_MODELS:
+                    break
+                req = urllib.request.Request(
+                    url, data=body, headers={"Content-Type": "application/json"}, method="POST"
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=150) as resp:
+                        out = json.loads(resp.read().decode("utf-8"))
+                    parts = out["candidates"][0]["content"]["parts"]
+                    raw_json = next(
+                        p["text"] for p in reversed(parts)
+                        if "text" in p and not p.get("thought")
+                    )
+                    res = json.loads(raw_json)
+                    res["relevance"] = max(0, min(3, int(res.get("relevance", 0))))
+                    res["source"] = source
+                    res["model"] = cur_model
+                    res["cost_usd"] = 0.0
+                    with open(cache, "w") as f:
+                        json.dump(res, f)
+                    return res
+                except urllib.error.HTTPError as e:
+                    full_err = e.read().decode("utf-8", "replace")
+                    last_err = f"HTTP {e.code} ({cur_model}): {full_err[:600]}"
+                    if e.code in (404, 400):
+                        _disable_model(cur_model, f"HTTP {e.code}")
+                        break
+                    elif e.code == 429:
+                        if _is_permanent_quota_error(full_err):
+                            _disable_model(cur_model, "HTTP 429 daily/zero quota")
+                            break
+                        wait_s = _parse_retry_delay(full_err, 20.0 * (rpm_attempt + 1))
+                        time.sleep(wait_s)
                     else:
-                        # Per-minute rate limit (RPM/TPM): parse retryDelay or sleep 25s
-                        m_wait = re.search(r"retry in ([\d.]+)s", err_body)
-                        wait_s = float(m_wait.group(1)) + 2.0 if m_wait else 25.0 * (pass_num + 1)
-                        time.sleep(min(wait_s, 65.0))
-                else:
-                    time.sleep(5 * (pass_num + 1))
-            except Exception as e:  # noqa: BLE001
-                last_err = f"{cur_model}: {e}"
-                time.sleep(4 * (pass_num + 1))
+                        time.sleep(5 * (pass_num + 1))
+                        break
+                except Exception as e:  # noqa: BLE001
+                    last_err = f"{cur_model}: {e}"
+                    time.sleep(4 * (pass_num + 1))
+                    break
     log(f"  FAILED {paper['id']}: {last_err}")
     return {"summary": "(Gemini summary failed - see abstract.)", "conclusions": [],
             "relevance": 0, "relevance_reason": "", "tags": [], "source": "error",
