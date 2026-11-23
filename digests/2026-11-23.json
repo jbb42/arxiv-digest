@@ -1,0 +1,627 @@
+{
+ "date": "2026-11-23",
+ "papers": [
+  {
+   "id": "2611.26785",
+   "title": "SciPIC-lite: A flexible Halo Occupation Distribution pipeline aimed at clustering observables",
+   "link": "https://arxiv.org/abs/2611.26785",
+   "authors": "Gabriele Parimbelli, Martin Crocce, Giosu\u00e8 Gambardella, Alexander Eggemeier, Pablo Fosalba, Elizabeth J. Gonzalez, Sujatha Ramakrishnan, Isaac Tutusaus, Zahra Baghkhani, Jorge Carretero, Francisco Castander, Andrea Pezzotta, Pau Tallada-Cresp\u00ed",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "new",
+   "abstract": "The Halo Occupation Distribution (HOD) framework provides a flexible approach to modelling the galaxy--halo connection in cosmological simulations, encoding the statistical relationship between galaxies and their host dark matter haloes. We present SciPIC-lite, a new public Python library for fast, flexible, and user-friendly HOD modelling, designed to populate dark matter haloes extracted from cosmological simulations with galaxies and to provide a comprehensive suite of tools for their subsequent analysis. The library is built around a modular and extensible codebase that incorporates the full breadth of the HOD framework, from the core occupation functions to a wide range of physically motivated extensions, making it suitable for a broad spectrum of galaxy clustering applications. We validate and characterise the performance of SciPIC-lite by developing a pipeline to fit the two-point correlation functions of H$\\alpha$-selected galaxies from the Flagship~2 simulation across multiple redshift bins. To this end, we populate AbacusSummit dark matter haloes with galaxies according to a variety of HOD parametrisations. We assess the robustness of the fits with respect to the choice of HOD parametrisation and the inclusion of physically motivated extensions, including assembly bias, velocity bias, conformity, and halo profile rescaling. The best-fit models are found to be remarkably robust across different HOD parametrisations and fitting configurations, with reduced $\\chi^2$ values clustering tightly around a common value regardless of the model adopted. We exploit these results to generate new AbacusSummit-based galaxy mocks that accurately reproduce the clustering properties of the Flagship~2 H$\\alpha$ galaxy population.",
+   "ai": {
+    "summary": "To connect dark matter $N$-body simulations to galaxy surveys like Euclid\u2014which primarily targets H$\\alpha$ emission-line galaxies around $z \\sim 1$\u2014cosmologists use Halo Occupation Distribution (HOD) models to statistically populate dark matter haloes with central and satellite galaxies. The authors introduce SciPIC-lite, a new public, simulation-agnostic Python library that builds galaxy mocks on both periodic boxes and light cones, measures clustering statistics (two-point correlation functions and power spectrum multipoles), and fits HOD parameters using differential evolution. Beyond standard mass-only occupation functions, the code natively supports physically motivated extensions such as assembly bias (dependence on halo properties beyond mass), 1-halo galactic conformity (correlations between central and satellite occupation), velocity bias, and customisable satellite density profiles. To validate the pipeline, the authors populate AbacusSummit dark matter haloes across three redshifts ($z = 0.950, 1.250, 1.625$) and fit the small-scale projected and redshift-space two-point correlation functions of H$\\alpha$-selected galaxies from Euclid's Flagship 2 simulation, demonstrating that the resulting mocks also accurately reproduce Flagship 2's large-scale clustering.",
+    "conclusions": [
+     "SciPIC-lite offers a portable, extensible alternative to simulation-specific tools like AbacusHOD, supporting arbitrary halo catalogues, light-cone outputs, user-defined HOD shapes, Jeans-equation satellite velocities, and end-to-end clustering fits.",
+     "Fitting Flagship 2 H$\\alpha$ galaxy two-point correlation functions ($w_{\\mathrm{p}}(r_{\\mathrm{p}})$ and $\\xi_{\\ell}(s)$) across $z \\in [0.85, 1.80]$ yields reduced $\\chi^2$ values that cluster tightly around a common value regardless of the central HOD parametrisation, showing strong degeneracies that two-point clustering alone cannot break.",
+     "Including HOD extensions (assembly bias, velocity bias, conformity, and halo profile rescaling) provides statistically significant improvements in specific cases, but does not fully resolve the residual offset from $\\chi^2_{\\mathrm{red}} = 1$, indicating limitations beyond the choice of HOD parametrisation.",
+     "A suite of 1,500 full-box AbacusSummit galaxy mocks (3 redshifts $\\times$ 4 HODs $\\times$ 5 model variants $\\times$ 25 realisations) built from the small-scale best-fit HODs reproduces the Flagship 2 power spectrum multipoles well into the large-scale regime outside the fitting range."
+    ],
+    "relevance": 1,
+    "relevance_reason": "While SciPIC-lite is a useful, simulation-agnostic Euclid-context tool for populating dark matter haloes with H$\\alpha$ galaxies and measuring clustering, it focuses on standard $\\Lambda$CDM HOD modelling rather than beyond-$\\Lambda$CDM simulations, emulators, hybrid EFT bias, or inhomogeneous cosmology.",
+    "tags": [
+     "HOD",
+     "galaxy clustering",
+     "Euclid",
+     "N-body simulations",
+     "mock catalogues"
+    ],
+    "source": "full text",
+    "model": "gemini-4-hydrogen",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.26822",
+   "title": "Kinetic Sunyaev Zel'dovich Velocity Reconstruction Using Vision Transformers",
+   "link": "https://arxiv.org/abs/2611.26822",
+   "authors": "Sophie Coulombe, Matthew C. Johnson",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "new",
+   "abstract": "Kinetic Sunyaev Zel'dovich (kSZ) velocity reconstruction uses correlations between maps of the cosmic microwave background (CMB) and a tracer of large scale structure (LSS) to infer the large-scale peculiar velocity field. Standard approaches to kSZ velocity reconstruction use quadratic estimators that are Fisher optimal for purely Gaussian fields. Here, we develop a pipeline for kSZ velocity reconstruction based on Vision Transformers (ViT) and show that this approach can improve the fidelity of velocity reconstruction. This is consistent with the network utilizing non-Gaussian information in the inputs that the quadratic estimators do not, though with the single simulation realization we have access to, we cannot exclude overfitting. Our approach can be applied to full-resolution maps from existing and near-term CMB and LSS datasets.",
+   "ai": {
+    "summary": "Kinetic Sunyaev-Zel'dovich (kSZ) velocity reconstruction combines cosmic microwave background (CMB) temperature maps with large-scale structure (LSS) density maps to infer the large-scale peculiar velocity field of the Universe. Standard approaches use Quadratic Estimators (QE) that are optimal only for purely Gaussian fields, thereby ignoring rich non-Gaussian information present on non-linear scales. In this work, the authors develop a machine learning pipeline based on a Vision Transformer (ViT) architecture, dividing full-sky HEALPix maps into localized tiles to reconstruct tomographic radial peculiar velocity fields. Using a curriculum training strategy on mock Gaussian data followed by fine-tuning on hydrodynamical maps from the FLAMINGO simulation, they demonstrate that the ViT outperforms standard quadratic estimators on small angular scales by successfully leveraging non-Gaussian mode coupling.",
+    "conclusions": [
+     "Developed a Vision Transformer (ViT) pipeline to perform tomographic kSZ velocity reconstruction from $N_{\\rm side}=2048$ HEALPix maps split into $256\\times 256$ pixel tiles.",
+     "Implemented a novel multi-term loss function (combining pixel MSE, tile-average MSE, and log power spectrum MSE) alongside a curriculum training procedure to isolate the kSZ signal from dominant primary CMB anisotropies.",
+     "Showed that fine-tuning the ViT on rotated FLAMINGO hydrodynamical simulation maps allows it to extract non-Gaussian correlations, outperforming the standard Quadratic Estimator (QE) on small angular scales.",
+     "Identified a major limitation in potential network overfitting due to the availability of only a single full-physics FLAMINGO lightcone realization for training and validation."
+    ],
+    "relevance": 0,
+    "relevance_reason": "This paper presents a machine learning pipeline for kinetic Sunyaev-Zel'dovich velocity reconstruction from CMB maps, which does not overlap with your focus on modified gravity emulators, Euclid LSS pipelines, or inhomogeneous cosmology.",
+    "tags": [
+     "kSZ effect",
+     "velocity reconstruction",
+     "machine learning",
+     "Vision Transformers",
+     "FLAMINGO simulation"
+    ],
+    "source": "full text",
+    "model": "gemini-3.6-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.26864",
+   "title": "Information-Criterion-Driven, Non-linear Deprojection of Angular Imaging Systematics for the SPHEREx Galaxy Clustering Sample",
+   "link": "https://arxiv.org/abs/2611.26864",
+   "authors": "James R. Cheshire, Sean T. Bruton, Charuhas W. Shiveshwarkar",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "new",
+   "abstract": "Imaging systematics that inject false, or suppress true, galaxy clustering signals are of primary concern for current- and next-generation galaxy surveys, such as the Spectro-Photometer for the History of the Universe, Epoch of Reionization, and Ices Explorer (SPHEREx) in its search for local primordial non-Gaussianity $f_{\\rm NL}$. As statistical errors shrink with growing galaxy samples, systematic rather than statistical uncertainties come to dominate the cosmological error budget. For effects whose spatial patterns are known or well-modelled \\emph{a priori}, a common mitigation approach regresses (deprojects) the density variation associated with a known angular template. In this work we present and demonstrate novel aspects of this procedure as will be applied to the SPHEREx galaxy clustering sample. These include flexible -- but, crucially, constrained and interpretable -- non-linear basis regression with polynomial/spline bases, and aggressive information criterion-driven automated template selection with an associated unbiased two-stage regression, using agreement between two independent selectors as a consistency diagnostic. The method automatically selects a template set of minimal-but-sufficient complexity while limiting the number of templates actually regressed, minimising cosmological information loss and making modern additive-plus-multiplicative approaches tractable. We demonstrate these features on SPHEREx-like lognormal mock catalogues with injected contamination of various spatial profiles, amplitudes, and levels of complexity. Principled, signal-preserving deprojection of the kind demonstrated here is a crucial step towards achieving SPHEREx's goal of $\\sigma(f_{\\rm NL}) < 0.5$.",
+   "ai": {
+    "summary": "Large-scale structure galaxy clustering analyses, particularly searches for local primordial non-Gaussianity ($f_{\\rm NL}$) on large angular scales, are severely vulnerable to observational imaging systematics like stellar contamination and dust extinction. The authors present an automated template deprojection methodology designed for the upcoming SPHEREx survey that mitigates these systematics while avoiding spurious cosmological signal loss. Their framework expands spatial templates into non-linear bases (Legendre polynomials or B-splines) and decouples template selection from amplitude fitting using an information-criterion-penalized selection step followed by an unbiased regression. Tested on contaminated lognormal mock catalogues, the approach automatically selects minimal-complexity template sets, capturing non-linear systematic couplings while preserving large-scale clustering signals necessary to reach SPHEREx's target of $\\sigma(f_{\\rm NL}) < 0.5$.",
+    "conclusions": [
+     "Decoupling template selection (via calibrated information criteria) from regression amplitude estimation eliminates shrinkage bias and reduces false-positive template selection by 4-10x relative to standard cross-validated ElasticNet.",
+     "Non-linear basis expansions (Legendre polynomials up to order 6 or B-splines) enable data-driven determination of template-density coupling complexity on a per-template basis.",
+     "Power suppression from deprojection on contaminated mocks is restricted to $\\ell < 32$, reducing large-scale power loss to 8.6-21.1% (for $5\\sigma_{\\rm clean}$ contaminants) compared to 23.6% when blindly deprojecting an unselected 42-template kit.",
+     "Using agreement between two distinct selectors (IC-penalized ElasticNet and Iterative Forward Selection) acts as an internal consistency diagnostic to ensure stable template curation."
+    ],
+    "relevance": 1,
+    "relevance_reason": "The paper presents map-based observational imaging systematic deprojection algorithms for SPHEREx galaxy clustering, which is only loosely related to your primary focus on non-linear theory, emulators, beyond-\\$\\Lambda\\text{CDM}\\$ simulations, and inhomogeneous cosmology.",
+    "tags": [
+     "galaxy clustering",
+     "systematics",
+     "deprojection",
+     "SPHEREx",
+     "primordial non-Gaussianity"
+    ],
+    "source": "full text",
+    "model": "gemini-3.6-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27069",
+   "title": "Beyond the Peak: Constraining early dark energy with the damping tail",
+   "link": "https://arxiv.org/abs/2611.27069",
+   "authors": "Hao Wang, Gen Ye, Yun-Song Piao",
+   "categories": [
+    "astro-ph.CO",
+    "hep-th"
+   ],
+   "type": "new",
+   "abstract": "Early dark energy is commonly characterized by the amplitude and location of its primary energy-injection peak. We show that its post-peak evolution, which we call the \\emph{EDE tail}, provides an additional observable probe of the underlying scalar dynamics and can materially affect its ability to alleviate the Hubble tension. We construct a simple phenomenological framework in which distinct regions of a multiscale scalar potential govern the dynamics at different field scales. As a representative realization, we consider a potential that combines axion-like and $\\alpha$-attractor-like regimes, thereby allowing the EDE tail to be reshaped through reflection and asymmetric oscillations. Confronting this framework with cosmic microwave background, baryon acoustic oscillation, and supernova observations, we find an improved fit to the high-$\\ell$ CMB data together with a higher inferred bestfit $H_0$. Our results show that the EDE tail retains observable information about the underlying scalar potential that is not captured by the conventional peak parameters alone. This provides a complementary route for constructing and observationally distinguishing EDE scenarios, and potentially for further alleviating the Hubble tension.",
+   "ai": {
+    "summary": "Early Dark Energy (EDE) is a prominent scalar-field proposal to alleviate the Hubble ($H_0$) tension by introducing a transient energy fraction near recombination, which reduces the sound horizon size. Standard EDE analyses parameterize the scalar field dynamics primarily through the peak energy fraction ($f_{\\mathrm{EDE}}$) and transition redshift ($z_c$), ignoring post-peak dynamics. In this work, the authors introduce a multiscale potential combining an axion-like regime ($\\phi>0$) with an $\\alpha$-attractor-like regime ($\\phi<0$) to explicitly test how the post-peak scalar field evolution (the \"EDE tail\") affects observables. Implementing the model in a modified AxiCLASS/CLASS Boltzmann solver, they constrain the scenario using Planck NPIPE high-$\\ell$ CMB, DESI DR2 BAO, and PantheonPlusSH0ES data. They demonstrate that the high-$\\ell$ CMB damping tail is sensitive to post-peak field dynamics (such as sharp field reflections or transient secondary slow-roll injections), providing enhanced fit improvements and modified inferred cosmological parameters relative to standard axion EDE.",
+    "conclusions": [
+     "The post-peak dynamics ('EDE tail') of scalar field EDE models alter sub-horizon perturbation evolution and leave distinct observable signatures on the high-$\\ell$ CMB damping tail, going beyond the traditional $f_{\\mathrm{EDE}}$ and $z_c$ peak parameterization.",
+     "The proposed Axion-\\alpha$-attractor (AtR) EDE model improves the fit to combined Planck NPIPE, DESI DR2 BAO, and PantheonPlusSH0ES data by $\\Delta \\chi^2 = -3.34$ relative to standard AxionEDE (and $\\Delta \\chi^2 = -32.67$ relative to $\\Lambda$CDM), driven mainly by the high-$\\ell$ CMB data.",
+     "The best-fit AtR model yields an inferred Hubble constant of $H_0 \\approx 72.3 \\text{ km s}^{-1}\\text{Mpc}^{-1}$, showing that modified EDE tail dynamics can achieve higher best-fit $H_0$ values.",
+     "Different EDE tail dynamics (e.g., steep field reflection vs. secondary slow-roll energy injection) produce distinguishable features in the gravitational (Weyl) potential evolution $\\Delta \\Phi_W / \\Phi_W$ and small-scale CMB $TT$/$EE$ power spectra, which can be probed by future CMB-S4 and Simons Observatory measurements."
+    ],
+    "relevance": 2,
+    "relevance_reason": "The paper investigates early dark energy scalar field dynamics and cosmological constraints (Planck, DESI BAO, Pantheon+) targeting the Hubble tension, matching medium relevance topics in Jonas's research profile.",
+    "tags": [
+     "Early Dark Energy",
+     "Hubble tension",
+     "CMB",
+     "Planck",
+     "DESI BAO"
+    ],
+    "source": "full text",
+    "model": "gemini-3.6-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27151",
+   "title": "Fast and accurate large-volume Lyman-$\u03b1$ forest mocks with three-dimensional U-Net trained on IllustrisTNG and FLAMINGO",
+   "link": "https://arxiv.org/abs/2611.27151",
+   "authors": "Bhaskar Arya, Soumak Maitra, Shadab Alam",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "new",
+   "abstract": "The Lyman-$\\alpha$ forest probes matter structure at $z\\gtrsim2$, constraining baryon acoustic oscillations, neutrino masses, and dark matter properties. Interpreting current and upcoming spectroscopic surveys requires mock catalogues spanning Gpc-scale volumes while capturing small-scale intergalactic medium physics. This combination of high resolution and large volume is prohibitively expensive for hydrodynamical simulations. We present a field-level emulator, based on a three-dimensional U-Net, that maps approximate density and velocity fields directly to Ly$\\alpha$ optical depth and transmitted flux. At $z\\sim3$, we train in small volumes and test on much larger, independent ones in two settings: IllustrisTNG (training on a $110\\,\\mathrm{cMpc}$ box and testing on a $300\\,\\mathrm{cMpc}$ box with 2LPT and $N$-body inputs) and FLAMINGO (training on $1\\,\\mathrm{cGpc}$ and testing on $2.8\\,\\mathrm{cGpc}$ with $N$-body inputs). The hydrodynamical statistics of TNG and FLAMINGO differ appreciably over their common $k$-range, by $\\sim15\\%$ in $P_{\\rm 1D}$, $\\sim17\\%$ in the bispectrum, and $\\sim40\\%$ in the connected trispectrum, although their normalized power-spectrum correlation structures remain broadly similar. Within each suite, the emulator reproduces $P_{\\rm 1D}$ to $2.8\\%$ in TNG and $5.6\\%$ in FLAMINGO, the bispectrum to $4$--$5\\%$, and the trispectrum to $10$--$16\\%$, while also recovering the flux PDF and broad correlation structure. Field-level emulation thus provides a practical route to large-volume Ly$\\alpha$-forest mocks for current and future surveys.",
+   "ai": {
+    "summary": "The Lyman-$\\alpha$ forest consists of absorption features in distant quasar spectra caused by neutral hydrogen in the intergalactic medium, making it a powerful probe of cosmic structure at $z \\gtrsim 2$, though creating Gpc-scale mock catalogues with full hydrodynamical simulations is computationally prohibitive. To overcome this, the authors train an anisotropic three-dimensional U-Net (a convolutional neural network) to map inexpensive gravity-only dark matter density and line-of-sight velocity fields directly to the Lyman-$\\alpha$ optical depth and transmitted flux at $z \\sim 3$. They test whether a network trained on a small box can generalize to a $\\sim 20\\times$ larger independent volume in two suites: IllustrisTNG ($110\\,\\mathrm{cMpc}$ to $300\\,\\mathrm{cMpc}$ using both 2LPT and $N$-body inputs) and FLAMINGO ($1\\,\\mathrm{cGpc}$ to $2.8\\,\\mathrm{cGpc}$ using $N$-body inputs). This field-level emulation approach successfully preserves both small-scale non-Gaussian physics and large-scale modes beyond the training box size, offering a practical way to generate Gpc-scale mocks for spectroscopic surveys like DESI.",
+    "conclusions": [
+     "Within each simulation suite, the 3D U-Net generalizes to $\\sim 20\\times$ larger volumes without degrading, recovering the 1D flux power spectrum $P_{\\rm 1D}$ to $2.8\\%$ in IllustrisTNG and $5.6\\%$ in FLAMINGO ($2$--$3\\%$ for $k \\le 1\\,\\mathrm{Mpc}^{-1}$), compared to $17$--$35\\%$ errors from the standard Fluctuating Gunn-Peterson Approximation (FGPA).",
+     "Non-Gaussian statistics that were never targeted during training are also accurately reproduced: the 1D flux bispectrum is recovered to $4$--$5\\%$ and the connected trispectrum (which governs non-Gaussian power-spectrum covariance) to $10$--$16\\%$, vastly outperforming FGPA ($60$--$97\\%$ discrepancies).",
+     "In IllustrisTNG, training the emulator on fast 2LPT inputs yields $P_{\\rm 1D}$ predictions consistent with $N$-body inputs (a $3.4\\%$ mean difference), showing that approximate gravity solvers are sufficient at this resolution.",
+     "Cross-suite transfer remains challenging: a network trained on downsampled IllustrisTNG fields underestimates FLAMINGO's $P_{\\rm 1D}$ by $\\sim 10\\%$ or more, reflecting genuine physical differences in cosmology, thermal history, and feedback between the suites."
+    ],
+    "relevance": 2,
+    "relevance_reason": "This paper is a useful methodological reference for your work on fast approximate simulations and ML emulators, as it demonstrates field-level emulation from 2LPT and $N$-body inputs and validates small-to-large-box volume transfer, though its target observable is the Lyman-$\\alpha$ forest rather than Euclid galaxy/lensing observables or beyond-$\\Lambda$CDM gravity.",
+    "tags": [
+     "Lyman-alpha forest",
+     "field-level emulator",
+     "U-Net",
+     "2LPT"
+    ],
+    "source": "full text",
+    "model": "gemini-4-hydrogen",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27249",
+   "title": "Baryon-Enhanced Strong Lensing Signatures of Self-Interacting Dark Matter Subhalos",
+   "link": "https://arxiv.org/abs/2611.27249",
+   "authors": "Meiwen Yang, Daneng Yang, Siyuan Hou, Yi-Ying Wang, Yiping Shu, Yue-Lin Sming Tsai",
+   "categories": [
+    "astro-ph.CO",
+    "astro-ph.GA"
+   ],
+   "type": "new",
+   "abstract": "Self-interacting dark matter (SIDM) is generally expected to suppress subhalo strong lensing through core formation, with subsequent gravothermal collapse potentially enhancing it. We show that compact stars can make a viable population of galaxy-hosting SIDM subhalos more efficient lenses than their cold dark matter (CDM) counterparts. When the baryonic potential weakens or reverses the inner velocity-dispersion gradient, SIDM halos suppress or bypass core formation, allowing inner densities to grow from early times. The evolved SIDM subhalos produce larger deflection angles and tangential caustics than in CDM. Such galaxy-hosting subhalos also dominate the galaxy-galaxy strong-lensing (GGSL) budget in clusters, yet lie far below the resolution of cosmological simulations. We calibrate a baryonic parametric SIDM model to predict their effects in the three most massive TNG300-1 clusters, finding GGSL cross sections 1.4--2.7 times those in CDM, comparable to the excess inferred in recent analyses. Baryon-enhanced SIDM lensing can thus account for the observed GGSL excess and predicts stronger perturbations from luminous satellites, testable through resolved distortions of background arcs and rings.",
+   "ai": {
+    "summary": "In self-interacting dark matter (SIDM) models, dark matter particles scatter off each other, which normally creates low-density cores in subhalos and weakens their gravitational lensing signal until a much later phase of runaway core contraction (gravothermal collapse). This paper demonstrates that compact stellar components in galaxy-hosting subhalos deepen the inner gravitational potential, raising the inner dark matter velocity dispersion and weakening or reversing its radial gradient so that core formation is suppressed or bypassed from early times. Using six controlled $N$-body simulations with live stars and dark matter (both isolated and orbiting in a cluster tidal field), the authors recalibrate a parametric SIDM model and apply it along the assembly histories of subhalos in the three most massive clusters of the TNG300-1 cosmological simulation. They show that baryon-enhanced SIDM subhalos produce stronger lensing deflections than their cold dark matter (CDM) counterparts, providing a natural explanation for the observed excess of galaxy-galaxy strong lensing (GGSL) in clusters that lies beyond the resolution of current full-physics SIDM cluster simulations.",
+    "conclusions": [
+     "Compact stellar potentials capable of suppressing SIDM core formation are common in massive cluster members: in TNG300-1 subhalos above $10^{11}\\,M_{\\odot}$, $43\\%$ have $\\Phi_b > 0.25\\Phi_h$ and $75\\%$ confine the maximum core radius within the stellar scale ($r_{\\mathrm{c,max}} < r_H$).",
+     "Across all six controlled benchmarks after $2\\,\\mathrm{Gyr}$ of tidal evolution, SIDM subhalos yield larger effective Einstein radii and source-plane tangential caustic areas than matched CDM halos by factors of $1.3$ to $5.0$, even under moderate tidal truncation ($r_t/r_s \\approx 2.0\\text{--}5.7$).",
+     "Applying the recalibrated baryonic parametric SIDM model to the three most massive TNG300-1 clusters at $z_l = 0.439$ increases the total GGSL cross section by factors of $1.43\\text{--}2.34$ (for $\\sigma_0/m = 20\\,\\mathrm{cm^2/g}$, $w = 500\\,\\mathrm{km/s}$) and $1.45\\text{--}2.65$ (for $\\sigma_0/m = 70\\,\\mathrm{cm^2/g}$, $w = 120\\,\\mathrm{km/s}$), matching the $\\sim 2\\text{--}3\\times$ excess reported in recent cluster lensing analyses.",
+     "Beyond cluster-wide GGSL rates, baryon-driven contraction predicts stronger inner deflection angles around luminous satellites (illustrated with the observed perturber G4 in SDSS J120602.09+514229.5), offering a direct observational test via resolved distortions of lensed arcs at known galaxy positions."
+    ],
+    "relevance": 1,
+    "relevance_reason": "This paper is only loosely related background: while it uses simulation-calibrated parametric modelling for a beyond-$\\Lambda$CDM scenario, its focus is SIDM particle physics and cluster strong lensing rather than modified gravity, large-scale structure emulators, or inhomogeneous cosmology.",
+    "tags": [
+     "SIDM",
+     "strong lensing",
+     "subhalos",
+     "N-body simulations",
+     "baryonic effects"
+    ],
+    "source": "full text",
+    "model": "gemini-4-hydrogen",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27265",
+   "title": "Features investigated: A detailed study of axion monodromy inflation using CLiENT",
+   "link": "https://arxiv.org/abs/2611.27265",
+   "authors": "Steen Hannestad, Rasmus Lumbye, Andreas Nygaard, Thomas Tram",
+   "categories": [
+    "astro-ph.CO",
+    "hep-ph"
+   ],
+   "type": "new",
+   "abstract": "We investigate features in the primordial power spectrum from inflation, specifically those predicted by the axion monodromy model, using recent observational data. In order to compute posteriors, profile likelihoods and Bayesian evidence accurately for the complex likelihood surfaces arising in this model we have used the CLiENT emulator framework. As our data combinations we use both a \"conservative\" set consisting of Planck PR4 temperature, polarisation and lensing data together with DESI DR2 BAO and Pantheon+ supernovae, and a more \"aggressive\" set which also includes small-scale CMB data from ACT and SPT. We find no robust oscillatory feature in current data. With the conservative data the best fit lies at a frequency $\\omega \\simeq 51$ and lowers $\\chi^2$ by 10.1 relative to a featureless spectrum. However, this feature is disfavoured by the more aggressive data combination, whose best fit lies at $\\omega \\simeq 31$ and lowers $\\chi^2$ by 7.4. Fits to featureless data are known to give similar improvements, and the Akaike information criterion, the Bayes factors and the look-elsewhere effect all indicate that neither improvement is significant. The amplitude is limited to $A_\\mathrm{osc} < 0.056$ and $A_\\mathrm{osc} < 0.062$ (95%) for the two datasets. The emulators reproduce the true log-likelihood at samples of their posteriors with rms errors of 0.07 and 0.16, and the profile likelihoods are calculated with the true likelihood, using the profile capability of CLiENT.",
+   "ai": {
+    "summary": "Axion monodromy inflation predicts logarithmic oscillations in the primordial power spectrum, which produce complex, highly multi-modal likelihood surfaces that hamper standard MCMC and nested sampling algorithms. To overcome this computational bottleneck, the authors apply CLiENT, a neural network framework designed to emulate the full cosmological likelihood function directly across all cosmological, oscillation, and nuisance parameters. Using both a conservative dataset (Planck PR4, DESI DR2 BAO, and Pantheon+ SNe) and an aggressive dataset (adding small-scale CMB temperature/polarization from ACT DR6 and SPT-3G), they perform a comprehensive search for oscillatory features up to frequencies $\\omega = 200$, allowing for running of the scalar spectral index $\\alpha_s$. They find no robust evidence for primordial oscillations: although the conservative dataset shows a peak at $\\omega \\simeq 51$ (improving $\\chi^2$ by $10.1$), this region is disfavoured when high-$\\ell$ ACT and SPT data are included, and model selection metrics (AIC, Bayes factors, and look-elsewhere corrections) show the improvement is statistically insignificant.",
+    "conclusions": [
+     "Current cosmological data shows no statistically significant evidence for logarithmic primordial oscillations from axion monodromy inflation.",
+     "The conservative dataset (Planck PR4 + DESI DR2 + Pantheon+) exhibits a nominal best fit at frequency $\\omega \\simeq 51$ with $\\Delta\\chi^2 = 10.1$, but small-scale ACT and SPT data disfavour this signal (best fit shifts to $\\omega \\simeq 31$ with $\\Delta\\chi^2 = 7.4$).",
+     "Model comparison yields Bayes factors of $\\ln B \\approx -1.0$ to $-1.2$, weakly favoring the standard featureless primordial power spectrum over axion monodromy after accounting for prior volume and look-elsewhere effects.",
+     "The 95% CL upper bounds on the oscillation amplitude are constrained to $A_{\\mathrm{osc}} < 0.056$ for the conservative dataset and $A_{\\mathrm{osc}} < 0.062$ for the aggressive combination.",
+     "Demonstrates that the CLiENT likelihood emulator accurately learns narrow likelihood peaks in non-trivial parameter spaces, reproducing true log-likelihood values with RMS errors of 0.07 to 0.16 across posterior samples."
+    ],
+    "relevance": 1,
+    "relevance_reason": "While the paper showcases an emulator method (CLiENT), the core application is primordial inflation feature searches in the CMB rather than non-linear LSS, modified gravity emulators, or inhomogeneous cosmology.",
+    "tags": [
+     "axion monodromy",
+     "primordial features",
+     "emulator",
+     "likelihood inference",
+     "CMB"
+    ],
+    "source": "full text",
+    "model": "gemini-3.5-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.26685",
+   "title": "Little Red Dots at Cosmic Noon: Spectroscopy Reveals Declining Abundance but a Non-Evolving Luminosity Function Shape",
+   "link": "https://arxiv.org/abs/2611.26685",
+   "authors": "Yilun Ma, Daniel J. Lyon, Jenny E. Greene, Alberto Torralba, Jorryt Matthee, Ivo Labbe, Andy D. Goulding, David J. Setton, Marianna Annunziatella, Aayush Desai, Eiichi Egami, Xiaohui Fan, Karl Glazebrook, Vasily Kokorev, Jiaxuan Li, Xiaojing Lin, Danilo Marchesini, Themiya Nanayakkara, Luke Robbins, Anna Sajina, Marcin Sawicki",
+   "categories": [
+    "astro-ph.GA",
+    "astro-ph.CO",
+    "astro-ph.HE"
+   ],
+   "type": "cross",
+   "abstract": "Little red dots (LRDs) are an extremely abundant population of red, compact, broad-line objects primarily found in the early universe. At $5<z<8$, they are at least 10 times more abundant than UV-selected quasars. Yet, how this population evolves towards lower redshift is unclear. In this work, we present our search for LRDs at cosmic noon ($2\\lesssim z\\lesssim 4$) in nearly 20 deg$^2$ of the Deep/UltraDeep fields of the Hyper Suprime-Cam Subaru Strategic Program (HSC-SSP). Combining multiwavelength wide-field imaging surveys from 0.3 to 4.5 $\\mu$m, we identify 266 photometric LRD candidates. With spectroscopic follow-up from Keck/NIRES, VLT/X-shooter, and Magellan/FIRE on 24 candidates, we identify a sample of four LRDs with broad H$\\alpha$ emission. With the purity of the photometric sample calibrated by spectroscopy, we estimate the number density of LRDs to be approximately $6.8\\times10^{-7}$ cMpc$^{-3}$ at $2.10<z<2.55$---this is nearly a factor of 35 decrease from their flat number density evolution at $4\\lesssim z\\lesssim8$ estimated from JWST spectroscopic surveys. The knee of the LRD optical luminosity function also remains consistently at $M_{5500}\\approx-22$ mag across $2<z<5$, below that of quasars. We further speculate that only the abundance of LRDs, but not the shape of their optical luminosity function, evolves with redshift, and the Roman Space Telescope will be able to test this decisively with a substantially larger sample of low-redshift LRDs.",
+   "ai": {
+    "summary": "\"Little Red Dots\" (LRDs) are a surprisingly abundant population of compact ($r_e \\lesssim 200\\text{ pc}$), broad-line active galactic nucleus (AGN) candidates discovered by JWST at high redshifts ($z > 4$). They display a characteristic V-shaped spectral energy distribution (a faint blue UV continuum coupled with an extremely red optical continuum) but lack traditional AGN features like strong X-ray emission or dusty torus dust emission. To determine how the abundance and optical luminosity function of LRDs evolve down to \"cosmic noon\" ($z \\sim 2\\text{--}3$), the authors searched nearly $20\\text{ deg}^2$ of wide-field multiwavelength imaging from the Hyper Suprime-Cam Subaru Strategic Program (HSC-SSP). They identified 266 photometric candidates and performed spectroscopic follow-up on 24 targets with Keck/NIRES, VLT/X-shooter, and Magellan/FIRE to confirm broad $\\mathrm{H}\\alpha$ emission and estimate sample purity. They found a dramatic drop in LRD number density by a factor of $\\sim 35$ from $z \\sim 5$ to $z \\sim 2$, while the turnover (\"knee\") of their optical luminosity function remained stationary, implying that the physical mechanism driving LRDs becomes rarer over cosmic time without changing its characteristic energy scale.",
+    "conclusions": [
+     "Identified 266 photometric LRD candidates at $1.7 < z < 3.7$ across $20\\text{ deg}^2$ of HSC-SSP fields, with ground-based spectroscopic follow-up revealing a photometric sample purity of $\\sim 25\\text{--}30\\%$.",
+     "Measured an LRD number density of $6.8 \\times 10^{-7}\\text{ cMpc}^{-3}$ ($M_{5500} < -20.5$) at $2.10 < z < 2.55$, confirming a $\\sim 35$-fold decline from their nearly flat abundance at $4 < z < 8$.",
+     "Discovered that the optical luminosity function knee for LRDs stays constant at $M_{5500} \\approx -22\\text{ mag}$ across $z \\sim 2\\text{--}5$, falling significantly below the quasar luminosity function knee ($M_{5500} \\sim -25$).",
+     "Indicates that while the physical conditions required to form LRD central engines become increasingly rare at lower redshifts, the intrinsic characteristic mass scale of the central engine does not evolve."
+    ],
+    "relevance": 0,
+    "relevance_reason": "This paper focuses on the observational demographics and optical luminosity function of Little Red Dots (high-redshift compact AGN), which is unrelated to Jonas's work on beyond-$\\Lambda$CDM simulations, emulators, or inhomogeneous cosmology.",
+    "tags": [
+     "active galactic nuclei",
+     "high-redshift",
+     "luminosity function",
+     "spectroscopy",
+     "galaxy evolution"
+    ],
+    "source": "full text",
+    "model": "gemini-3.6-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27006",
+   "title": "Physics-Guided Recursive Self-Improvement of Amortized Bayesian Inference Across Physics",
+   "link": "https://arxiv.org/abs/2611.27006",
+   "authors": "Bo Liang, Mingtao Chen, Minghui Du, Ziren Luo, Guohua Wang, Peng Xu, Zhichao Hu, Maxm Pan",
+   "categories": [
+    "physics.comp-ph",
+    "astro-ph.CO",
+    "astro-ph.EP",
+    "astro-ph.IM"
+   ],
+   "type": "cross",
+   "abstract": "Across physics, from the orbits of imaged exoplanets and the matter inside neutron stars to thin films at synchrotrons and cortical neurons, conservation laws, interference, and compensating currents compress the posteriors of precise data into tiny, curved regions where Markov chains need minutes to days. We introduce PhyRSI (physics-guided recursive self-improvement), in which an AI agent coupled to the simulator writes and revises an amortized Bayesian inference algorithm for each field, scored by the importance weights of the exact likelihood because the true posterior is unknown. It evolves coordinates, symmetries, and factorizations matched to the physics: orbital elements at the best-measured epoch, Fresnel-normalized reflectivity with a chart for each of its multiple solutions, coordinates along which Na+ and K+ currents compensate, a shared neutron-star equation of state that factorizes a 32-dimensional joint analysis, and the time-rescaling symmetry of predator-prey dynamics. In six fields, networks trained once on simulations return 36 posteriors of real observations in seconds, reweighted by the likelihood and agreeing with converged Markov chains about as closely as two independent chains agree with each other. Such posteriors could steer synchrotron film growth and patch-clamp recordings as they run, follow X-ray transients while they are bright, update the dense-matter equation of state as neutron stars are added, and compare physical models across catalogs. Inference can thus be evolved and checked by the physics itself rather than designed by hand for each problem.",
+   "ai": {
+    "summary": "In many physical domains, parameter estimation via traditional Markov Chain Monte Carlo (MCMC) methods is severely bottlenecked by narrow, highly curved posterior geometries induced by conservation laws or parameter degeneracies. To solve this, the authors introduce PhyRSI (Physics-Guided Recursive Self-Improvement), a framework where an AI agent interacts with a physics simulator and an exact likelihood function to automatically craft and refine an amortized Bayesian inference pipeline. The agent discovers domain-adapted physical coordinate transformations, local charts, and factorized network architectures, using exact likelihood importance weights (such as effective sample size) as a self-improving feedback score. Across six diverse physical fields\u2014including exoplanet orbits, X-ray spectra, and neutron star equations of state\u2014PhyRSI produces likelihood-reweighted posteriors for 36 real observational datasets in seconds, matching converged MCMC chains while delivering computational speedups of up to $10^6\\times$.",
+    "conclusions": [
+     "PhyRSI automates the design of amortized Bayesian inference algorithms by evaluating candidates directly against physical likelihood importance weights (effective sample size ESS and Pareto tail index $\\hat{k}$).",
+     "The agent autonomously identifies optimal physical coordinate transforms (e.g., equinoctial elements) and factorizations (e.g., isolating shared neutron-star EOS from individual stellar parameters) to overcome severe posterior volume contraction.",
+     "Tested on 36 real physical datasets across six disciplines, the amortized networks generated posteriors in seconds that agreed with long MCMC reference chains to within 0.13\u20130.66 mnat in mean Jensen-Shannon divergence.",
+     "Speedups relative to 4-core MCMC reference chains reached $10^2\\times$ to nearly $10^6\\times$, demonstrating potential for real-time streaming parameter estimation."
+    ],
+    "relevance": 1,
+    "relevance_reason": "The paper provides a general machine learning and simulation-based inference (SBI) technique, but does not directly apply it to cosmology, Large Scale Structure, or modified gravity emulators.",
+    "tags": [
+     "simulation-based inference",
+     "amortized inference",
+     "machine learning",
+     "bayesian inference",
+     "neutron stars"
+    ],
+    "source": "full text",
+    "model": "gemini-3.6-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27228",
+   "title": "Dark Energy Based on Modified Gravity: Where the Future Lies?",
+   "link": "https://arxiv.org/abs/2611.27228",
+   "authors": "Shin'ichi Nojiri, Sergei D. Odintsov, V.K. Oikonomou, Oem Trivedi",
+   "categories": [
+    "gr-qc",
+    "astro-ph.CO",
+    "hep-th"
+   ],
+   "type": "cross",
+   "abstract": "Based on current observational data, there is a strong possibility that dark energy was in a phantom regime in the near past, and a transition from a phantom to a quintessential regime may have occurred. Since then, many scenarios compatible with the DESI data have been proposed. In particular, there exist several realistic models in the framework of $F(R)$ gravity. In this paper, we show that such realistic models of $F(R)$ gravity may produce an anti-gravity or ghost graviton in the future. The problem could be avoided by further changing the parameters and fine-tuning the initial conditions, but we propose to introduce a potential barrier of the scalar field for the small scalar curvature region, which prevents the Universe from evolving into the anti-gravity or having a ghost graviton region, without the fine-tuning of the initial conditions. We also discuss how this regime can be tested using peculiar velocity and kSZ effect probes.",
+   "ai": {
+    "summary": "Recent observational hints from DESI suggest that dark energy might have undergone a phantom-to-quintessence transition ($w < -1$ to $w > -1$). While modified gravity theories like $f(R)$ can easily generate phantom-crossing expansion histories, many realistic $f(R)$ models suffer from unphysical future instabilities, such as anti-gravity ($f'(R) < 0$) or ghost graviton states, unless initial conditions are heavily fine-tuned. The authors analyze this problem by mapping $f(R)$ gravity to its equivalent scalar-tensor theory in the Einstein frame, where cosmic evolution is governed by a scalar potential $V(\\sigma)$. To solve the instability without fine-tuning, they propose introducing a potential barrier at small scalar curvatures that dynamically prevents the Universe from entering the ghost/anti-gravity regime, and they briefly discuss observational tests using peculiar velocity and kinetic Sunyaev-Zel'dovich (kSZ) probes.",
+    "conclusions": [
+     "Realistic $f(R)$ models capable of reproducing DESI-like phantom-crossing dark energy transitions generally evolve into anti-gravity ($f'(R) < 0$) or ghost graviton regimes in the finite future.",
+     "Mapping $f(R)$ gravity to the Einstein frame demonstrates that the anti-gravity boundary corresponds to a branch-point divergence in the scalar field $\\sigma = -\\ln f'(R)$.",
+     "Adding a potential barrier to the scalar field potential $V(\\sigma)$ at small scalar curvatures prevents the Universe from dynamically evolving into ghost/anti-gravity states without requiring fine-tuned initial conditions.",
+     "The authors outline qualitative observational tests using peculiar velocities and kSZ effect probes to distinguish this scalar-tensor barrier scenario."
+    ],
+    "relevance": 1,
+    "relevance_reason": "The paper provides theoretical background on $f(R)$ gravity instabilities and dark energy phantom-crossing models, but does not focus on N-body simulations, emulators, or Euclidean LSS observables directly relevant to Jonas's research profile.",
+    "tags": [
+     "f(R) gravity",
+     "modified gravity",
+     "dark energy",
+     "phantom crossing",
+     "scalar-tensor"
+    ],
+    "source": "full text",
+    "model": "gemini-3.5-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27611",
+   "title": "Cosmological Correlators with Triple Massive Exchanges",
+   "link": "https://arxiv.org/abs/2611.27611",
+   "authors": "Shuntaro Aoki, Lucas Pinol, Zhehan Qin, Fumiya Sano, Masahide Yamaguchi, Yuhang Zhu",
+   "categories": [
+    "hep-th",
+    "astro-ph.CO",
+    "gr-qc",
+    "hep-ph"
+   ],
+   "type": "cross",
+   "abstract": "Among all tree-level contributions to the primordial bispectrum, the triple exchange of massive scalars is the most challenging. In this paper we present an analytical formula for this bispectrum in the form of a double series, which allows the three exchanged fields to have different masses and converges throughout the whole physical region. We obtain it by expanding the mixed propagator with the softest momentum, so that the triple exchange becomes a sum of integrals over two mixed propagators. Each of these integrals satisfies a differential equation and is fixed by its value at equal momentum. We further show that the squeezed limit follows directly from this formula and takes a simple and compact form.",
+   "ai": {
+    "summary": "During inflation, heavy scalar fields can interact and mix with inflaton perturbations, leaving distinct oscillatory features in the primordial bispectrum\u2014a phenomenon known as the cosmological collider physics program. Calculating these primordial correlators analytically is notoriously difficult for loop diagrams or tree diagrams with multiple massive internal lines, such as the triple exchange process where three massive fields meet at a cubic vertex. In this paper, the authors obtain an analytical formula for the tree-level bispectrum of three scalar fields with arbitrary, distinct masses. By expanding the mixed propagator carrying the softest momentum, they reduce the triple-exchange time integral to a set of two-propagator integrals governed by inhomogeneous differential equations, which are solved analytically in terms of hypergeometric functions using boundary conditions from a Laplace-representation technique. This provides a convergent double-series representation valid across all triangle configurations (squeezed, equilateral, and folded) and yields explicit expressions for squeezed-limit oscillations.",
+    "conclusions": [
+     "Derived the first convergent, analytical double-series expression for the primordial bispectrum from triple massive exchanges of three scalar fields with generally unequal masses.",
+     "Showed that the calculation reduces to two-propagator differential equations whose analytical boundary conditions at equal momentum are determined via a Laplace representation of Schwinger-Keldysh propagators.",
+     "Demonstrated that in the squeezed limit ($k_1 \\ll k_3$), each massive field induces an oscillatory signature in $\\log(k_1/k_3)$ with a frequency determined by its own mass $\\mu_i$, leading to modulated beat-pattern oscillations when multiple distinct masses are present.",
+     "Obtained a closed-form expression for the equal-mass squeezed-limit amplitude that eliminates infinite series, matching independent prior derivations."
+    ],
+    "relevance": 0,
+    "relevance_reason": "",
+    "tags": [
+     "primordial non-Gaussianity",
+     "inflation",
+     "cosmological collider",
+     "bispectrum",
+     "cosmological correlators"
+    ],
+    "source": "full text",
+    "model": "gemini-3.6-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2611.27986",
+   "title": "Ohmic warm inflation",
+   "link": "https://arxiv.org/abs/2611.27986",
+   "authors": "Anish Ghoshal, Alessandro Strumia",
+   "categories": [
+    "hep-ph",
+    "astro-ph.CO",
+    "hep-th"
+   ],
+   "type": "cross",
+   "abstract": "We show that Warm Little Inflation is anomalous, lacks a suitable inflaton potential, and cannot sustain the thermal bath, as the quasi-static approximation over-estimated the dissipated power. To address these issues, we propose a new friction mechanism and new anomaly-free models based on one fermion charged under a U(1) gauge group in one extra dimension. The four-dimensional lattice version is a ring of $N$ U(1) groups with one fermion at each site, reducing to an anomaly-free version of the warm little inflaton model for $N=2$. The inflaton is a Wilson line, protected for $N\\ge5$. Large $N$ allows a suitable monodromy inflaton potential. In the continuum limit, $N\\to\\infty$, the inflaton velocity becomes a five-dimensional electric field and friction becomes Ohmic dissipation, which seems able to sustain warm inflation compatibly with observations.",
+   "ai": {
+    "summary": "Warm inflation assumes that the inflaton field continuously dissipates energy into a surrounding thermal bath during inflation, keeping the temperature high without requiring a separate reheating phase. The authors re-examine the popular 'Warm Little Inflaton' (WLI) framework\u2014which uses a symmetry mechanism to protect the inflaton potential while providing friction via mass-modulated fermions\u2014and uncover severe conceptual flaws. Specifically, they show WLI suffers from uncancelled chiral gauge anomalies and that its friction was over-estimated by orders of magnitude because the inflaton rotates faster than particle collision rates (invalidating the standard quasi-static approximation). To solve this, the authors construct an anomaly-free model using a extra-dimensional $U(1)$ gauge theory (or a ring of $N$ gauge groups), where the inflaton is a Wilson line protected from quantum corrections, and show that in the continuum limit friction naturally emerges as Ohmic dissipation of a fermionic plasma driven by a 5D electric field.",
+    "conclusions": [
+     "Identifies critical flaws in Warm Little Inflation, showing that occupation relaxation supplies at most 1--12% of the power required to sustain the thermal bath because mass modulation outruns particle collisions.",
+     "Resolves gauge anomalies and thermal mass mixing by assigning opposite chiral charges and independent bath couplings to the active fermions.",
+     "Formulates an anomaly-free extra-dimensional model (and its $N$-site lattice ring representation) where the inflaton is a Wilson line whose potential is protected by locality in field space for $N \\ge 5$.",
+     "Shows that in the continuum limit ($N \\to \\infty$), the inflaton's velocity translates to an electric field along the compact dimension, turning the friction into standard Ohmic dissipation capable of sustaining warm inflation consistently with CMB constraints."
+    ],
+    "relevance": 0,
+    "relevance_reason": "This paper is strictly about early-universe inflation field theory and microphysical friction mechanisms, which falls outside your core focus on non-linear LSS, Euclid emulators, and inhomogeneous cosmology.",
+    "tags": [
+     "warm inflation",
+     "inflation",
+     "field theory",
+     "extra dimensions",
+     "early universe"
+    ],
+    "source": "full text",
+    "model": "gemini-3.6-flash",
+    "cost_usd": 0.0
+   }
+  },
+  {
+   "id": "2502.11568",
+   "title": "Alleviating the Hubble tension with self-interacting ultralight dark matter",
+   "link": "https://arxiv.org/abs/2502.11568",
+   "authors": "Jae-Weon Lee",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "We study the possibility that a self-interacting ultralight dark matter field with a characteristic energy scale $\\tilde{m}\\simeq 1~{\\rm eV}$ can behave like an extra radiation component before recombination. This additional radiation can reduce the sound horizon of the photon-baryon fluid. A smaller sound horizon can give a higher inferred value of the present-day Hubble parameter at the background level, and thus may help reduce the Hubble tension. This effect can be obtained without adding another dark sector component besides self-interacting ULDM. A full perturbation and likelihood analysis is needed to see if the model is consistent with CMB and structure-formation data."
+  },
+  {
+   "id": "2508.03823",
+   "title": "Scaling Relations for Dark Matter Halos Hosting Ultra-Faint Dwarf Galaxies",
+   "link": "https://arxiv.org/abs/2508.03823",
+   "authors": "Levi K. C. Fisher, Isabelle S. Goldstein, Jason Kumar, Louis E. Strigari",
+   "categories": [
+    "astro-ph.CO",
+    "astro-ph.GA",
+    "hep-ph"
+   ],
+   "type": "replace",
+   "abstract": "We consider the extraction of parameters of dark matter halos hosting ultra-faint dwarf galaxies, in the case where there are only ${\\cal O}(10)$ identified member stars with measured line-of-sight velocities. This scenario is likely to be increasingly common, as upcoming newly discovered dwarf galaxies in the Milky Way, by e.g. the Rubin Observatory, will likely (at least initially) have only a few identified members. Assuming an NFW dark matter profile, equilibrium modeling likely can only robustly extract one halo parameter ($\\rho_s r_s$), but the scale radius itself will typically be unconstrained. In these cases, the results obtainable from Jeans modeling can be well replicated by a simple scaling relation motivated by the half-light mass estimator. As a application, we examine the recently discovered stellar system Ursa Major III, which has been optimistically assessed to have the largest $J$-factor of any known object. We suggest that, because of the presence of outlier stars, the $J$-factor obtained from modeling of Ursa Major III is likely inflated, as it is inconsistent with the half-light mass estimator, while removal of the outliers will leave the $J$-factor unconstrained from below."
+  },
+  {
+   "id": "2601.14559",
+   "title": "Dark Energy Survey Year 6 Results: Cosmological Constraints from Galaxy Clustering and Weak Lensing",
+   "link": "https://arxiv.org/abs/2601.14559",
+   "authors": "DES Collaboration : T. M. C. Abbott, M. Adamow, M. Aguena, A. Alarcon, S. S. Allam, O. Alves, A. Amon, D. Anbajagane, F. Andrade-Oliveira, S. Avila, D. Bacon, E. J. Baxter, J. Beas-Gonzalez, K. Bechtol, M. R. Becker, G. M. Bernstein, E. Bertin, J. Blazek, S. Bocquet, D. Brooks, D. Brout, H. Camacho, G. Camacho-Ciurana, R. Camilleri, G. Campailla, A. Campos, A. Carnero Rosell, M. Carrasco Kind, J. Carretero, P. Carrilho, F. J. Castander, R. Cawthon, C. Chang, A. Choi, J. M. Coloma-Nadal, M. Costanzi, M. Crocce, W. d'Assignies, L. N. da Costa, M. E. da Silva Pereira, T. M. Davis, J. De Vicente, J. DeRose, H. T. Diehl, S. Dodelson, P. Doel, C. Doux, A. Drlica-Wagner, T. F. Eifler, J. Elvin-Poole, J. Estrada, S. Everett, A. E. Evrard, J. Fang, A. Farahi, A. Fert\u00e9, B. Flaugher, P. Fosalba, J. Frieman, J. Garc\u00eda-Bellido, M. Gatti, E. Gaztanaga, G. Giannini, P. Giles, K. Glazebrook, M. Gorsuch, D. Gruen, R. A. Gruendl, J. Gschwend, G. Gutierrez, I. Harrison, W. G. Hartley, E. Henning, K. Herner, S. R. Hinton, D. L. Hollowood, K. Honscheid, E. M. Huff, D. Huterer, B. Jain, D. J. James, M. Jarvis, N. Jeffrey, T. Jeltema, T. Kacprzak, S. Kent, A. Kovacs, E. Krause, R. Kron, K. Kuehn, O. Lahav, S. Lee, E. Legnani, C. Lidman, H. Lin, N. MacCrann, M. Manera, T. Manning, J. L. Marshall",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "We present cosmology results combining galaxy clustering and weak gravitational lensing measured in the full six years (Y6) of observations by the Dark Energy Survey (DES) covering $\\sim$5000 deg$^2$. We perform a large-scale structure analysis using three two-point correlation functions (3$\\times$2pt): (i) cosmic shear from 140 million source galaxy shapes, (ii) galaxy clustering of 9 million lens galaxy positions, and (iii) galaxy-galaxy lensing from their cross-correlation. We model the data in flat $\\Lambda$CDM and $w$CDM cosmologies. The combined analysis yields $S_8\\equiv \\sigma_8 (\\Omega_{\\rm m}/0.3)^{0.5} = 0.789^{+0.012}_{-0.012}$ and matter density $\\Omega_{\\rm m} = 0.333^{+0.023}_{-0.028}$ in $\\Lambda$CDM (68\\% CL), where $\\sigma_8$ is the clustering amplitude. These constraints show a (full-space) parameter difference of 1.8$\\sigma$ from a combination of cosmic microwave background (CMB) primary anisotropy datasets from Planck 2018, ACT-DR6, and SPT-3G DR1. Projected only into $S_8$ the difference is $2.6\\sigma$. In $w$CDM the Y6 3$\\times$2pt results yield $S_8 = 0.782^{+0.021}_{-0.020}$, $\\Omega_{\\rm m} = 0.325^{+0.032}_{-0.035}$, and dark energy equation-of-state parameter $w = -1.12^{+0.26}_{-0.20}$. For the first time, we combine all DES dark-energy probes: 3$\\times$2pt, SNe Ia, BAO and Clusters. In $\\Lambda$CDM this combination yields a $2.8\\sigma$ parameter difference from the CMB. When combining DES 3$\\times$2pt with other low-redshift datasets (DESI DR2 BAO, DES SNe Ia, SPT clusters), we find a 2.3$\\sigma$ parameter difference with CMB. A joint fit of Y6 3$\\times$2pt, CMB, and those low-redshift datasets produces the tightest $\\Lambda$CDM constraints to date: $S_8 = 0.806^{+0.006}_{-0.007}$, $\\Omega_{\\rm m} = 0.302^{+0.003}_{-0.003}$, $h = 0.683^{+0.003}_{-0.002}$, and $\\sum m_\\nu < 0.14$ eV (95\\% CL). In $w$CDM, this combination yields $w = -0.981^{+0.021}_{-0.022}$."
+  },
+  {
+   "id": "2602.16651",
+   "title": "Interpreting the HI 21-cm cosmology maps through Largest Cluster Statistics III: Impact of the lightcone effect",
+   "link": "https://arxiv.org/abs/2602.16651",
+   "authors": "Hemanth Potluri, Manas Mohit Dosibhatla, Samit Kumar Pal, Leon Noble, Chandra Shekhar Murmu, Suman Majumdar, Saswata Dasgupta, Satadru Bag, Abhirup Datta",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "The redshifted 21-cm signal emitted by neutral Hydrogen (HI) is a promising probe to understand the evolution of the topology of ionized regions during the Epoch of Reionization (EoR). The topology of ionized regions allows us to infer the nature and properties of ionizing sources, i.e., early galaxies and AGNs. Traditional Fourier statistics, such as the power spectrum, help us quantify the strength of fluctuations in this field at different length scales but do not preserve its phase information. Analyzing the 21-cm brightness temperature field in the image domain retains its non-Gaussian characteristics and morphological information. One such approach is to track the coalescence of multiple ionized regions to form one contiguous ionized region spanning the universe. This is referred to as percolation, and its onset is quantified by a sharp rise in the value of the Largest Cluster Statistic (LCS) approaching unity. In this work, we carry out a percolation analysis of 21-cm brightness temperature maps by studying the redshift evolution of the LCS along a lightcone to distinguish between several simulated reionization scenarios. We estimate the LCS of subvolumes of different sizes in mock SKA-Low 21-cm lightcone maps and study their redshift evolution for different reionization scenarios using a moving volume approach. We find that the optimal size of the moving volume that reproduces the percolation transition from coeval maps varies across reionization scenarios and the evolution of LCS remains distinct across the reionization scenarios for a fixed moving volume bandwidth. The inferred percolation transition strongly depends on the synthesized beam width and the percentage gain calibration error, and is tractable for an optimistic SKA-Low observational setup."
+  },
+  {
+   "id": "2607.14525",
+   "title": "Probabilistic redshift estimation of undetected galaxies from multi-band background light maps",
+   "link": "https://arxiv.org/abs/2607.14525",
+   "authors": "Shun-Sheng Li, Hendrik Hildebrandt, Ludovic Van Waerbeke",
+   "categories": [
+    "astro-ph.CO",
+    "astro-ph.IM"
+   ],
+   "type": "replace",
+   "abstract": "Accurate knowledge of the redshift distributions of undetected galaxy populations is essential for extracting the cosmological information encoded in the cosmic optical background. We present the first framework for estimating these distributions directly from multi-band maps of unresolved background light, using conditional normalising flows trained on realistic image simulations. For imaging quality comparable to that expected from the Euclid survey and the Vera C. Rubin Observatory Legacy Survey of Space and Time (LSST), our model achieves sub-per cent accuracy in both the mean and standard deviation of the flux-weighted redshift distributions when the training and target samples are statistically well matched. Furthermore, the network proves highly resilient to incomplete photometric coverage when combined with tailored data imputation strategies. To address the challenge of statistical mismatches between simulations and real observations, we propose incorporating observational quantities into the target variables, providing a built-in diagnostic to assess model reliability and uncertainty from the predictions themselves. We also demonstrate the feasibility of map-based tomographic analyses, showing that the model retains sufficient pixel-level detail to recover redshift distributions for tomographically defined subsamples with near sub-per cent accuracy across all bins."
+  },
+  {
+   "id": "2607.21244",
+   "title": "Shape wall: Constraints on late-time solutions to the Hubble tension from the dimensionless expansion rate",
+   "link": "https://arxiv.org/abs/2607.21244",
+   "authors": "Miguel A. Sabogal, Luis A. Escamilla, Davide Pedrotti, Edvig Selimaj, Sunny Vagnozzi",
+   "categories": [
+    "astro-ph.CO",
+    "gr-qc",
+    "hep-ph",
+    "hep-th"
+   ],
+   "type": "replace",
+   "abstract": "The standard \"no-go theorem\" against late-time solutions to the Hubble tension is essentially a normalization wall, since Baryon Acoustic Oscillation (BAO) measurements constrain the product $H_0r_d$, with $r_d$ the sound horizon at baryon drag. However, late-time solutions (which keep $r_d$ fixed) are tightly constrained not only by the BAO normalization $H_0r_d$, but also by the shape of the expansion history, i.e. the dimensionless expansion rate $E(z) \\equiv H(z)/H_0$. We show that, if $r_d$ and the acoustic angular scale $\\theta_s$ are fixed, an increase in $H_0$ needs to be matched by an equal fractional increase in the dimensionless distance integral $I \\equiv \\int dz/E(z)$: $\\delta H_0/H_0 \\simeq \\delta I/I$. We use this to quantify the \"shape wall\" set by relative distance constraints on $E(z)$, which we reconstruct nonparametrically, using Gaussian Processes and the latest unanchored Type Ia Supernovae (SNeIa) and BAO data. In our most conservative analysis using PantheonPlus SNeIa and DESI DR2 BAO data, we find a maximum fractional increase in $H_0$ of $\\lesssim 2\\%$, falling well short of the $\\gtrsim 8\\%$ required to solve the tension. This shape wall holds even in the presence of early-time new physics, and limits the maximum increase in $H_0$ which can be contributed by late-time modifications to $E(z)$ at fixed $\\theta_s$. Therefore, late-time modifications, whether invoked alone or alongside early-time new physics, face not only the well-known normalization wall, but also a stringent percent-level shape wall."
+  },
+  {
+   "id": "2608.13346",
+   "title": "Automatic detection of fast oscillations of dark matter scalar field and updated cosmological constraints on QCDM",
+   "link": "https://arxiv.org/abs/2608.13346",
+   "authors": "Amin Aboubrahim, Pran Nath",
+   "categories": [
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "It is well known that a scalar field dark matter with a quadratic potential undergoes fast oscillations when the time period represented by the mass scale in the Klein-Gordon equation becomes much smaller than that set by the Hubble parameter. This makes a solution to the equation numerically intractable. Many works in the literature have addressed the problem by either switching between solving the Klein-Gordon equation in the well-behaved regime to solving the fluid equations at the onset of oscillations, or by introducing a new set of variables that can absorb these oscillations. Despite being successful, these techniques rely on an estimate of when the oscillations start. For large scale scans of a model's parameter space, this can become cumbersome. Furthermore, the techniques have been used mainly for non-interacting dark matter models. In this work, we introduce an averaging technique with an automatic detection of the onset of oscillations, capable of capturing the non-interacting as well as the interacting dark matter scenarios. The technique, implemented in \\texttt{CLASS}, is tested on the QCDM model and shows excellent detection and averaging abilities. We also update the cosmological constraints on the model using the most recent public data."
+  },
+  {
+   "id": "2508.18448",
+   "title": "Imprints of screened dark energy on nonlocal quantum correlations",
+   "link": "https://arxiv.org/abs/2508.18448",
+   "authors": "Fabiano Feleppa, Gaetano Lambiase, Sunny Vagnozzi",
+   "categories": [
+    "gr-qc",
+    "astro-ph.CO",
+    "hep-ph",
+    "quant-ph"
+   ],
+   "type": "replace",
+   "abstract": "We investigate how screening mechanisms, reconciling light scalar fields driving cosmic acceleration with local fifth force constraints, can be probed via their impact on nonlocal quantum correlations between entangled spin pairs, whose evolution on a curved background is affected by General Relativity (GR) and screened modified gravity effects. We consider a gedankenexperiment featuring a pair of massive, spin-$1/2$ particles orbiting the Earth, evaluating their nonlocal correlations through spin observables associated to the Clauser-Horne-Shimony-Holt (CHSH) inequality. Using a general formalism developed earlier for curved space-time spin evolution, we compute the effects of screening on the CHSH inequality, finding its degree of violation to be suppressed relative to the flat space-time case. Applying this formalism to the chameleon, symmetron, and dilaton mechanisms, we identify currently unconstrained regions of parameter space where the screening contribution is comparable to that of GR. While detecting these effects will be challenging, our work provides a proof-of-principle for testing screened dark energy through quantum nonlocality."
+  },
+  {
+   "id": "2511.08448",
+   "title": "Bounds on screened dark energy from near-Earth space-based measurements",
+   "link": "https://arxiv.org/abs/2511.08448",
+   "authors": "Fabiano Feleppa, Welmoed Marit de Graaf, Philippe Brax, Gaetano Lambiase",
+   "categories": [
+    "gr-qc",
+    "astro-ph.CO",
+    "hep-ph"
+   ],
+   "type": "replace",
+   "abstract": "We test screened dark energy with near-Earth, space-based measurements. In a post-Newtonian framework, we compute leading corrections to geodetic precession (Gravity Probe B), LAGEOS-2 pericenter advance, and the Sagnac delay in a prospective orbital configuration, yielding bounds on chameleon, symmetron, and dilaton models. LAGEOS-2 sets the strongest Earth-orbit limits on symmetron and dilaton, while a Sagnac setup at the projected sensitivity of state-of-the-art space clocks gives the tightest chameleon constraint. These results show that low-density, space-based experiments sensitively probe screened dark energy and exclude previously allowed parameter space. Notably, at an assumed delay precision of $\\mathcal{O}\\big(10^{-19}\\big)$, a Sagnac test would exclude the entire chameleon parameter space considered."
+  },
+  {
+   "id": "2601.22644",
+   "title": "Nonlocal Corrections to Scalar Field Effective Action in de Sitter spacetime",
+   "link": "https://arxiv.org/abs/2601.22644",
+   "authors": "Will Cerne, Teruaki Suyama",
+   "categories": [
+    "gr-qc",
+    "astro-ph.CO",
+    "hep-th"
+   ],
+   "type": "replace",
+   "abstract": "We investigate the one-loop effective action for a test scalar field in a general Friedmann-Lema\u00eetre-Robertson-Walker (FLRW) background, specifically focusing on quantum corrections up to the second order in the interaction strength. By employing the Schwinger-Keldysh formalism, we derive the equation of motion for the field expectation value, which incorporates not only the standard local radiative corrections but also novel nonlocal features: a memory term and a stochastic noise term. We identify all ultraviolet divergent structures within these nonlocal terms and provide a consistent renormalization procedure. To analyze the physical impact of these terms, we apply a local approximation under the assumption of slowly-varying fields, by which the memory term acts as a negative contribution to the drift coefficient. As a concrete application, we consider a massive $\\phi^4$ theory and show that these one-loop corrections lead to a suppression of the field variance in the infrared regime compared to the tree-level results."
+  },
+  {
+   "id": "2602.23915",
+   "title": "Impact of non-standard neutrino-electron interactions on Big Bang Nucleosynthesis",
+   "link": "https://arxiv.org/abs/2602.23915",
+   "authors": "Julien Froustey, Stefano Gariazzo, Jaume Moncho, Sergio Pastor, Ofelia Pisanti",
+   "categories": [
+    "hep-ph",
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "Neutrino non-standard interactions (NSI) with electrons, predicted in many extended theoretical models of particle physics, are known to alter the picture of neutrino decoupling from the cosmic plasma. We update previous analyses of neutrino decoupling in the presence of NSI with electrons, extending the parameter space and assessing their impact on the primordial light-element abundances produced during Big Bang Nucleosynthesis (BBN). We show that tracking the NSI-induced modifications of the neutrino distributions is necessary to accurately predict the helium-4 abundance, which cannot be derived from a pure $N_{\\rm eff}$-driven change. BBN therefore provides additional observables that are complementary to $N_{\\rm eff}$. We then derive cosmological constraints on non-universal and flavour-changing NSI parameters, using different dataset combinations, and compare them with bounds from terrestrial experiments. We find that the cosmological limits are significantly less stringent than the terrestrial ones, but they provide an independent probe of neutrino interactions in the early universe."
+  },
+  {
+   "id": "2605.13738",
+   "title": "Inpainting to search for premerger massive black hole binaries in realistic LISA datasets",
+   "link": "https://arxiv.org/abs/2605.13738",
+   "authors": "Gareth Cabourn Davies, Ian Harry",
+   "categories": [
+    "astro-ph.IM",
+    "astro-ph.CO",
+    "gr-qc",
+    "hep-ex"
+   ],
+   "type": "replace",
+   "abstract": "A key science target of the Laser Interferometer Space Antenna (LISA) is to carry out multi-messenger observations of massive black hole binaries, observing the merger simultaneously in gravitational waves and with electromagnetic observatories. Identifying that a merger is happening and providing an updating estimate of the sky location in the hours, days and weeks before the merger is critical to enable electromagnetic observations of the merger event. In this work we demonstrate and compare two methods for premerger identification of massive black hole binaries; a zero-latency filter approach and, for the first time, an approach using an ``inpainting'' technique. We apply these methods to the LISA Data Challenge dataset 2a--Sangria-HM--and demonstrate the successful recovery of the 14 signals in the dataset that we expected to be identifiable at least half a day before merger. We show that the inpainting method can identify premerger signals even when gaps are present in the data, demonstrating the recovery of a signal even when 3 day-long data gaps are added to the 14 days preceding merger. Finally, we explore the challenge of overlapping signals, using a region of overlapping signals in the Sangria-HM dataset, all of which merge within a 10-day window, and show how removing signals that have been confidently identified from the data allows us to identify quieter signals in the same period."
+  },
+  {
+   "id": "2605.18944",
+   "title": "The Majoron Cosmological Window: Dark Matter and Thermal Leptogenesis",
+   "link": "https://arxiv.org/abs/2605.18944",
+   "authors": "Arturo de Giorgi, Daniel Naredo-Tuero, Xavier Ponce D\u00edaz",
+   "categories": [
+    "hep-ph",
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "The majoron is the Nambu-Goldstone boson associated with the spontaneous breaking of a global $B-L$ symmetry. Remarkably, the minimal majoron framework can simultaneously address three key empirical indications of physics beyond the Standard Model: neutrino masses, the matter-antimatter asymmetry, and dark matter. In this work, we identify the cosmologically viable region in which majoron dark matter and high-scale thermal leptogenesis can be realised simultaneously. We show that successful leptogenesis plays a central role in making this scenario predictive: by constraining the right-handed-neutrino mass scale, it determines the irreducible freeze-in contribution to the majoron abundance and fixes the size of the couplings relevant for visible dark matter decays. Combining the irreducible dark matter production mechanisms with warm dark matter limits and indirect searches for decaying dark matter, we map the resulting majoron cosmological window and show that future X- and gamma-ray telescopes can probe part of the surviving parameter space."
+  },
+  {
+   "id": "2606.10017",
+   "title": "Refined anti-proton and anti-deuteron fluxes from weak-scale Dark Matter",
+   "link": "https://arxiv.org/abs/2606.10017",
+   "authors": "Marco Cirelli, Mattia Di Mauro, Arpan Kar",
+   "categories": [
+    "astro-ph.HE",
+    "astro-ph.CO",
+    "astro-ph.GA",
+    "hep-ph"
+   ],
+   "type": "replace",
+   "abstract": "We provide the cosmic-ray (CR) fluxes of antiprotons and antideuterons produced by the Galactic annihilation or decay of weak-scale dark matter (DM) particles of masses in the range from a few GeV to 100 TeV. We estimate these fluxes based on the updated models for the propagation of charged particles in the Galaxy and using the improved $\\bar{p}$ and $\\bar{d}$ spectra provided by $\\texttt{CosmiXs}$. For the updated propagation models we consider the MIN/MED/MAX sets under the new SLIM/BIG/QUAINT schemes. We treat the Galactic propagation in a semi-analytic way including different possible effects such as spatial diffusion, energy-losses, convection and diffusive reacceleration. For the DM distribution in the Galactic halo we consider NFW, Einasto and Burkert profiles with the most updated parameters. Moreover, we also incorporate the latest models for the inelastic cross-sections of $\\bar{p}$ and $\\bar{d}$ based on ALICE data. We validate our calculations with those available in the literature or those obtained from other publicly available numerical packages. We compare the CR fluxes obtained in this work with those provided previously by $\\texttt{PPPC4DMID}$ which were based on old propagation scenarios. We find that the CR fluxes obtained here with the new propagation models are much more robust (compared to the older ones) under the variation MIN - MAX. We also discuss the impact of this in the improvement of the discovery potential of a possible DM signal in the light of the present and upcoming CR observations. We provide all our results for the DM-induced interstellar CR fluxes in a tabulated format (for the kinetic energy range 0.1 GeV - 100 TeV) in the $\\texttt{GitHub}$ repository of the newly created $\\texttt{CosmiXsPPPC}$ project. The results are ready to be used for studies related to DM indirect searches."
+  },
+  {
+   "id": "2607.23119",
+   "title": "Parameter Estimation on LIGO-Virgo-KAGRA O4a Binary Merger Triggers with Sub-solar Mass Components",
+   "link": "https://arxiv.org/abs/2607.23119",
+   "authors": "Nelson Christensen, Neil Cornish, Florian K\u00fchnel, Mairi Sakellariadou, Andres Santiago Villares Guanga",
+   "categories": [
+    "gr-qc",
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "The LIGO-Virgo-KAGRA collaboration has reported the results for searches for sub-solar mass components in compact binary coalescence during observing run O4a. No detection candidates were identified, but the most significant seven triggers were reported. We present the results of Bayesian parameter inference on these triggers. Five of the triggers show agreement between the Bayesian parameter estimation and the search pipeline trigger. Our results show that three of the triggers may contain a possible sub-solar mass component. Parameter estimation indicates that the other two events, if real, would be neutron star - black hole binaries. The remaining two triggers do not provide informative parameter estimation. We also study three O4a compact binary coalescence triggers, and one O3 trigger, that have been noted by three other groups, and our parameter estimation indicates that three of these may contain a sub-solar mass component. We study the data quality associated with these triggers. Finally, we discuss the challenges for parameter estimation on compact binary coalescence events containing a sub-solar mass component: long signal duration, possible small chirp masses, possible small mass ratios, and data quality issues over potentially hundreds of seconds of data."
+  },
+  {
+   "id": "2608.09014",
+   "title": "Locating the missing baryons in the warm-hot intergalactic medium with fast radio bursts and the Sunyaev-Zel'dovich effect",
+   "link": "https://arxiv.org/abs/2608.09014",
+   "authors": "Dao-Hong Zhai, F.Y. Wang, Zi-Gao Dai, Renyue Cen",
+   "categories": [
+    "astro-ph.HE",
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "Traditional astronomical censuses in the late-time Universe can only account for a fraction of the baryonic matter budget. Hydrodynamical simulations predict that the missing baryons reside in the vast filamentary structures of the cosmic web as a highly diffuse, warm-hot intergalactic medium (WHIM). Observing the WHIM directly has remained a long-standing challenge due to its typical temperature. In this study, we measure the angular cross-power spectrum between the dispersion measures (DMs) of fast radio bursts (FRBs) from the second CHIME/FRB catalog and the thermal Sunyaev-Zel'dovich (tSZ) Compton-$y$ map from the Planck satellite. After masking cataloged galaxy clusters, we find a positive correlation between FRB DMs and the tSZ map at $>98\\%$ confidence ($p_{\\rm null}=0.0169$). With a temperature normalization of $2.4\\times10^6\\ {\\rm K}$, we infer that a fraction $f_{\\rm WHIM}=0.375^{+0.165}_{-0.161}$ of cosmic baryons resides in the hotter WHIM. These measurements constrain a substantial reservoir of hotter diffuse gas in the cosmic web and statistically close the cosmic baryon budget in the local Universe under the adopted density and pressure model."
+  },
+  {
+   "id": "2609.00115",
+   "title": "Early Supermassive Black Holes and Little Red Dots Require Free-Fall Growth",
+   "link": "https://arxiv.org/abs/2609.00115",
+   "authors": "Junehyoung Jeon, Volker Bromm, Michael Boylan-Kolchin, Julian B. Mu\u00f1oz",
+   "categories": [
+    "astro-ph.GA",
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "Supermassive black holes/active galactic nuclei (SMBHs/AGN), forming only a few hundred million years after the Big Bang as observed with the James Webb Space Telescope (JWST), challenge theoretical understanding. How could they grow so massive $(M_{\\rm BH} > 10^6 {\\rm \\,M}_\\odot)$ so quickly after initial seeding? Is this rapid growth related to the numerous and enigmatic Little Red Dots (LRDs), compact sources with AGN-like characteristics, discovered by JWST? To address these mysteries, we consider the first-order constraint on SMBH growth: enough baryonic material has to reach the vicinity of the SMBH seed, located near the bottom of the gravitational potential well of the host dark matter halo. We specifically examine cold-mode accretion, where gas from the cosmic environment flows into the virialized halo in cold streams without being shock-heated, efficiently reaching the center on a free-fall timescale. We find that cold mode accretion is necessary to supply material for the SMBHs to reach the observed masses, whereas for shock-heated gas inflow the required amount could only be supplied by implausibly rare halos. Moreover, cold-mode inflow in rare $(\\sim1$ Gpc$^{-3}$) halos matches the mass and number of the massive quasars, and halos able to support super-Eddington accretion for massive SMBHs ($\\sim10^7$ M$_\\odot$) match LRD number densities. The decreasing LRD abundance at lower redshifts may then reflect the termination of cold-mode accretion in the growing host halos. The populations of massive SMBHs and LRDs at early times may thus arise naturally from cosmological structure formation, based on the abundance of halos capable of supplying sufficient material through cold accretion."
+  },
+  {
+   "id": "2611.16480",
+   "title": "Euclid Data Release 1 (DR1). An overview of the Science Ground Segment architecture and operations",
+   "link": "https://arxiv.org/abs/2611.16480",
+   "authors": "Euclid Collaboration : M. Ruffenach (1), M. Frailis (2), A. Zacchei (2 and 3), P. Casenove (1), M. S. Holliman (4), H. Aussel (5), B. Altieri (6), G. Angora (7 and 8), A. Basset (1), A. N. Belikov (9 and 10), J. BENARROCH (11), T. Bouvard (11), M. Brescia (12 and 7), S. Cavuoti (7 and 13), S. Farrens (5), R. Gimenez (1), R. Giusteri (2), X. Goudot (11), A. Gregorio (14 and 2 and 15), J. Haase (16), T. Heuberger (17), S. Kruk (6), G. Libet (1), S. Marcin (17), S. Maurogordato (18), M. Melchior (19), F. Pasian (2), G. Riccio (7), F. Rizzo (2), E. A. Valentijn (9), O. R. Williams (20), S. Andreon (21), N. Auricchio (22), S. Awan (23), C. Baccigalupi (3 and 2 and 15 and 24), M. Baldi (25 and 22 and 26), A. Balestra (27), S. Bardelli (22), P. Battaglia (22), R. Bender (16 and 28), A. Biviano (2 and 3), R. P. Blake (4), A. Bonchi (29), E. Branchini (30 and 31 and 21), S. Camera (32 and 33 and 34), V. Capobianco (34), C. Carbone (35), J. Carretero (36 and 37), M. Castellano (38), G. Castignani (22), P.-Y. Chabaud (39), K. C. Chambers (40), A. Cimatti (41), C. Colodro-Conde (42), G. Congedo (4), C. J. Conselice (43), L. Conversi (44 and 6), Y. Copin (45), A. Costille (39), F. Courbin (46 and 47 and 48), H. M. Courtois (49), M. Cropper (23), R. da Silva (38 and 29), H. Degaudenzi (50), S. de la Torre (39), G. De Lucia (2), C. Dolding (23), H. Dole (51), F. Dubath (50), X. Dupac (6), S. Dusini (52), S. Escoffier (53), M. Farina (54), R. Farinelli (22), F. Faustini (38), S. Ferriol (45), F. Finelli (22 and 55), N. Fourmanoit (53), E. Franceschi (22), P. Franzetti (35), M. Fumana (35), L. Gabarra (56), S. Galeotta (2), K. George (57), W. Gillard (53), B. Gillis (4), C. Giocoli (22 and 26), P. G\u00f3mez-Alvarez (58 and 6), J. Gracia-Carpio (16), A. Grazian (27), F. Grupp (16 and 28), S. Gwyn (59), W. G. Hartley (50), S. V. H. Haugan (60), G. Helou (61 and 62), S. Hemmati (62), J. Hoar (6), H. Hoekstra (63), W. Holmes",
+   "categories": [
+    "astro-ph.IM",
+    "astro-ph.CO"
+   ],
+   "type": "replace",
+   "abstract": "The Euclid mission is designed to address fundamental questions on the nature of dark energy and dark matter by mapping the extragalactic sky with a wide-area survey complemented by targeted deep observations. The required scientific performance places stringent demands on the Euclid Science Ground Segment (SGS), which transforms raw telemetry into calibrated, validated, and scientifically exploitable products. The SGS is a distributed system comprising the Euclid Science Operations Centre, the Science Data Centres, Instrument Operation Teams, and supporting Organisation Units, within a common architectural and procedural framework. This paper presents the SGS as implemented for Data Release 1 (DR1), describing its organisation, architecture, processing functions, and operational model. We outline the main components of the SGS common infrastructure. A key element is the Euclid Archive System (EAS), the central metadata repository based on a common data model. It comprises a Distributed Storage System, providing scalable storage of data files across the Science Data Centres; a Data Processing System used by the pipelines to register and access files and their lineage; and a Science Archive, distributing validated data products. Processing is coordinated by a common orchestration framework based on the Infrastructure Abstraction Layer, providing workflow management and resource abstraction of distributed compute clusters. Software development, integration, and deployment are supported by the Common Development Environment. We describe daily operations, calibration, and quality control, followed by the DR1 production campaign, including processing flows, validation strategy, and computational and data volumes. This infrastructure enabled Euclid DR1, involving 35 million jobs across nine Science Data Centres and 6.7 million core-hours, demonstrating robustness and scalability of the SGS."
+  }
+ ]
+}
