@@ -5,11 +5,12 @@ on:
     branches: [main]
     paths:
       - 'digests/**'
+      - '.github/workflows/daily_digest.yml'
   schedule:
     # arXiv announces new listings at 20:00 US Eastern (00:00 UTC in EDT / 01:00 UTC in EST,
     # i.e. 01:00-02:00 CET). GitHub Actions often delays scheduled crons by 4-6 hours,
     # so we queue off-minute triggers starting at 00:17 UTC every day. Once a new batch is
-    # built, subsequent runs see no new papers and exit in <5s without redeploying.
+    # built, subsequent runs see no new papers and exit in <5s.
     - cron: '17 0,1,2,3,4,5,6 * * *'
   workflow_dispatch:
     inputs:
@@ -23,26 +24,24 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install poppler-utils (for pdftotext fallback)
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -68,13 +67,35 @@ jobs:
           fi
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: './digests'
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Wait for Pages artifact to become visible
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Work around GitHub Actions artifact-visibility lag (actions/deploy-pages#451)
+          for i in $(seq 1 18); do
+            count=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts?name=github-pages" --jq '.total_count' 2>/dev/null || echo 0)
+            echo "Attempt $i: found $count github-pages artifact(s)"
+            if [ "${count:-0}" -ge 1 ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Timed out waiting for artifact metadata; proceeding with deploy."
+
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
